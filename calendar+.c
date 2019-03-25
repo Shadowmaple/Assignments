@@ -1,3 +1,5 @@
+//严格以日历表的形式输出日历
+
 #include <stdio.h>
 int main()
 {
