@@ -66,8 +66,10 @@ int main()
         putchar('\n');
     }
 //    value[0][0][0] = 0;
+    if (blank[0])
+        value[0][0][0] = 0;
 
-    puts("\t\t-------2019年万历表--------\n");
+    printf("\t\t-------%d年万历表--------\n", year);
     int month = 0;
 
     //一列四个月
