@@ -17,7 +17,7 @@ int get_blank(int year)
 int main()
 {
     int day[12]={31,28,31,30,31,30,31,31,30,31,30,31};
-    char week[] = " SUN MON TUE WED THU FRI STA ";
+    char week[] = " SUN MON TUE WED THU FRI STA";
     int blank[12] = {0};
     int value[12][6][7] = {0};
     int year;
@@ -52,28 +52,30 @@ int main()
                 blank[i+1] = blank[i] + day[i] - j*7;
                 if (blank[i+1] == 7)
                     blank[i+1] = 0;
-                printf("%d\n", blank[i]);
+ //               printf("%d\n", blank[i]);
                 break;
             }
         }
-        printf("\n*%d\n", value[0][0][0]);
+/*        printf("\n*%d\n", value[0][0][0]);
         for (int x=0; x<6; x++) {
             for (int y=0; y<7; y++) {
                 printf("%3d", value[i][x][y]);
             }
-            putchar('\n');            //一个月7列
-        }        num = 1;
+            putchar('\n');
+        }
         putchar('\n');
+*/
     }
-//    value[0][0][0] = 0;
     if (blank[0])
         value[0][0][0] = 0;
 
-    printf("\t\t-------%d年万历表--------\n", year);
+    printf("\t\t\t-------%d年万历表--------\n", year);
     int month = 0;
 
     //一列四个月
     for (int i=0; i<4; i++) {
+        printf("%26d月\t%26d月\t%26d月\n", month+1, month+2, month+3);
+        printf("%s\t%s\t%s\n", week, week, week);
         //一个月6行
         for (int j=0; j<6; j++) {
             int m = month;
@@ -81,9 +83,9 @@ int main()
                 //一个月7列
                 for (int y=0; y<7; y++) {
                    if (value[m][j][y]==0)
-                        printf("   ");
+                        printf("    ");
                     else                
-                        printf("%3d", value[m][j][y]);
+                        printf("%4d", value[m][j][y]);
                 }
                 putchar('\t');
             }
