@@ -1,4 +1,4 @@
-//严格以日历表的形式输出日历
+//竖排输出
 
 #include <stdio.h>
 int main()
