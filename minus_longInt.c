@@ -11,6 +11,7 @@ void clear_blankAndZero(char s[])
     while (s[i] == ' ')
         i++;
     strcpy(s, s+i);
+
     //去掉开头的零
     if (s[0]-'0' == 0)
         strcpy(s, s+1);
@@ -25,18 +26,18 @@ void minus_number(char a[], char b[], char c[])
         flag = 0;
 
         int n = (a_n) - (b[j]-'0');
-        if (n >= 0) {
+        if (n >= 0)
             c[k] = n + '0';
-        } else {
+        else {
             //不足则借一
             flag = 1;
             c[k] = 10 + n + '0';
         }
     }
     //被除数长度大于除数时多的部分
-    while (i >= 0) {
+    while (i >= 0)
         c[k--] = a[i--] - '0' - flag + '0';
-    }
+    
 //    c[N+1] = '\0';
     clear_blankAndZero(c);
 }
@@ -52,23 +53,33 @@ void swap(char a[], char b[])
 int main()
 {
     char a[N+1], b[N+1], c[N+1];
-    scanf("%s%s", a, b);
+    int is_swap = 0;
+
+    printf("a=");
+    scanf("%s", a);
+    printf("b=");
+    scanf("%s", b);
     memset(c, ' ', N+2);
 
-
     //调整被除数与除数的顺序
-    if (strlen(a) < strlen(b))
+    if (strlen(a) < strlen(b)) {
         swap(a, b);
-    else if (strlen(a) == strlen(b)) {
+        is_swap =1;
+    } else if (strlen(a) == strlen(b)) {
         if (strcmp(a, b)==0) {
             puts("a-b=0");
             return 0;
-        } else if (strcmp(a, b) < 0)
+        } else if (strcmp(a, b) < 0) {
             swap(a, b);
+            is_swap = 1;
+        }
     }
 
     minus_number(a, b, c);
-    printf("a-b=%s\n", c);
+    if (is_swap)
+        printf("b-a=%s\n", c);
+    else
+        printf("a-b=%s\n", c);
 
     return 0;
 }
