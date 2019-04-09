@@ -5,24 +5,26 @@
 
 int flag = 0;
 
-void clear_blank(char s[])
+void clear_blankAndZero(char s[])
 {
     int i = 0;
     while (s[i] == ' ')
         i++;
     strcpy(s, s+i);
+    //去掉开头的零
+    if (s[0]-'0' == 0)
+        strcpy(s, s+1);
 }
 
 void minus_number(char a[], char b[], char c[])
 {
     int i=strlen(a)-1, j=strlen(b)-1, k=N;
+
     for (; i>=0 && j>=0; i--, j--, k--) {
         int a_n = a[i] - '0' - flag;
         flag = 0;
-//        if (a_n < 0) {
-  //          flag = 1;
-    //    }
-        int n = (a[i]-'0') - (b[i]-'0');
+
+        int n = (a_n) - (b[j]-'0');
         if (n >= 0) {
             c[k] = n + '0';
         } else {
@@ -33,9 +35,10 @@ void minus_number(char a[], char b[], char c[])
     }
     //被除数长度大于除数时多的部分
     while (i >= 0) {
-        c[k--] = a[i--] - '0' - flag;
+        c[k--] = a[i--] - '0' - flag + '0';
     }
-    clear_blank(c);
+//    c[N+1] = '\0';
+    clear_blankAndZero(c);
 }
 
 void swap(char a[], char b[])
@@ -51,6 +54,7 @@ int main()
     char a[N+1], b[N+1], c[N+1];
     scanf("%s%s", a, b);
     memset(c, ' ', N+2);
+
 
     //调整被除数与除数的顺序
     if (strlen(a) < strlen(b))
