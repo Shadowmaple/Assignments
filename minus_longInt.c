@@ -5,11 +5,37 @@
 
 int flag = 0;
 
+void clear_blank(char s[])
+{
+    int i = 0;
+    while (s[i] == ' ')
+        i++;
+    strcpy(s, s+i);
+}
+
 void minus_number(char a[], char b[], char c[])
 {
     int i=strlen(a)-1, j=strlen(b)-1, k=N;
-    
-    
+    for (; i>=0 && j>=0; i--, j--, k--) {
+        int a_n = a[i] - '0' - flag;
+        flag = 0;
+//        if (a_n < 0) {
+  //          flag = 1;
+    //    }
+        int n = (a[i]-'0') - (b[i]-'0');
+        if (n >= 0) {
+            c[k] = n + '0';
+        } else {
+            //不足则借一
+            flag = 1;
+            c[k] = 10 + n + '0';
+        }
+    }
+    //被除数长度大于除数时多的部分
+    while (i >= 0) {
+        c[k--] = a[i--] - '0' - flag;
+    }
+    clear_blank(c);
 }
 
 void swap(char a[], char b[])
