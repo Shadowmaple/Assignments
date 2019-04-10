@@ -1,3 +1,5 @@
+//长整数相减运算
+
 #include <stdio.h>
 #include <string.h>
 
