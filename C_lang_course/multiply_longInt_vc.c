@@ -1,5 +1,5 @@
 //长整数乘法
-//环境：window vc6.0
+//环境：windows vc6.0
 
 #include <stdio.h>
 #include <string.h>
@@ -51,6 +51,7 @@ int main()
     int len_ab, zero_num, index;
     int i;
     
+    puts("Please enter the number a and b:");
     printf("a = ");
     scanf("%s", a);
     printf("b = ");
@@ -77,6 +78,7 @@ int main()
         add_number(c, n);
     }
 
+	c[2*N+1] = '\0';
     clear_zero(c);
     printf("a * b = %s\n", c);
 
