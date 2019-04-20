@@ -78,7 +78,7 @@ int main()
         add_number(c, n);
     }
 
-	c[2*N+1] = '\0';
+    c[2*N+1] = '\0';
     clear_zero(c);
     printf("a * b = %s\n", c);
 
