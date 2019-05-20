@@ -51,8 +51,8 @@ int main()
 
 	f = fopen("001_file.txt", "w+");
 	for (i=0; i < total; i++) {
-		printf("%4s %10s %5d %5d %8ld\n", pro[i].dm, pro[i].mc, pro[i].dj, pro[i].sl, pro[i].je);
-		fprintf(f, "%4s %10s %5d %5d %8ld\n", pro[i].dm, pro[i].mc, pro[i].dj, pro[i].sl, pro[i].je);
+		printf("%4s %10s %5d %5d %11ld\n", pro[i].dm, pro[i].mc, pro[i].dj, pro[i].sl, pro[i].je);
+		fprintf(f, "%4s %10s %5d %5d %11ld\n", pro[i].dm, pro[i].mc, pro[i].dj, pro[i].sl, pro[i].je);
 	}
 
 	fclose(f);
