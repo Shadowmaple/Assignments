@@ -12,9 +12,20 @@ struct product
 int mian()
 {
 	int i, j;
+	int con;
+	FILE *f;
+
 	while (1) {
-		
+		printf("输入1继续，0退出：");
+		scanf("%d", &con);
+		if (!con)
+			break;
+
+		for (i=0; 1; i++) {
+			scanf("%s%s%d%d", pro[i].dm, pro[i].mc, &pro[i].dj, &pro[i].sl);
+			pro[i].je = pro[i].dj * pro[i].sl;
+		}
 	}
-	
+
 	return 0;
 }
