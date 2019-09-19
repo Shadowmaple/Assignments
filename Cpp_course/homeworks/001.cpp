@@ -7,7 +7,7 @@
 // 时间：2019.9.19
 
 # include "iostream"
-# include "cstring"
+// # include "cstring"
 
 using namespace std;
 
@@ -31,16 +31,31 @@ double add(double a, double b) {
     return a + b;
 }
 
-char *add(char *a, char *b){
-    cout << "(char, char)" << endl;
-    strcat(a, b);
+char *add(char a[], char b[]){
+    cout << "(char [], char [])" << endl;
+    // strcat(a, b);
+    int n = 0;
+    while (a[n++] != '\0') ;
+
+    n--;
+    for (int i = 0; b[i] != '\0'; i++) {
+        a[n++] = b[i];
+    }
+    a[n] = '\0';
+
     return a;
 }
+
+// 产生二义性
+// int add(int& a, int& b) {
+//     cout << "uuuuuu"<<endl;
+//     return a + b;
+// }
 
 int main() {
     // 整型相加
     int x = 2, y = 3;
-    int &k = x, &i = y;
+    int & k = x, i = y;
     cout << add(x, y) << endl;  // 传值方式进行整型相加
     cout << add(k, i) << endl;  // 传引用方式进行整型相加
 
@@ -63,7 +78,7 @@ int main() {
     cout << add(dx, dy) << endl;    // 传引用
 
     // 字符串相连
-    char a[] = "hello, world ", b[] = "and c++";
+    char a[50] = "hello, world ", b[] = "and c++";
     cout << add(a, b) << endl;
 
     return 0;
