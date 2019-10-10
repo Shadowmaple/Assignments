@@ -10,6 +10,7 @@
 
 # include <iostream>
 # include <time.h>
+# include <stdio.h>
 
 using namespace std;
 
