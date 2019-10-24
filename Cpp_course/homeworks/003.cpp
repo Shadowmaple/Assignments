@@ -1,6 +1,7 @@
 /*
 课程：C++面向对象程序设计
-题目：设计一个person类，派生出student类，在student类的基础上派生出undergraduate类。
+题目：类族对象统计
+要求：设计一个person类，派生出student类，在student类的基础上派生出undergraduate类。
 为设计的三个类以不同的方式生成多个对象，然后统计每类对象数。
 
 开发环境：Linux
