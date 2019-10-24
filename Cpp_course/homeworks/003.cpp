@@ -27,7 +27,7 @@ public:
     }
     ~Person() {count--;}
     static void show_count() {
-        cout << "Person 类：" << count << endl;
+        cout << "THe number of Person class is: " << count << endl;
     };
 };
 
@@ -41,7 +41,7 @@ public:
         count++;
     }
     static void show_count() {
-        cout << "Student 类：" << count << endl;
+        cout << "The number of Student class is: " << count << endl;
     };
 };
 
@@ -57,7 +57,7 @@ public:
         count++;
     }
     static void show_count() {
-        cout << "Undergraduate 类：" << count << endl;
+        cout << "The number of Undergraduate class is: " << count << endl;
     };
 };
 
@@ -72,7 +72,6 @@ int main() {
     Undergraduate ustu_1("Maple", 20, "2018214554", "计算机", 2018);
 
     // 输入各类对象的成员数
-    cout << "各类对象数：" << endl;
     Person::show_count();
     Student::show_count();
     Undergraduate::show_count();
