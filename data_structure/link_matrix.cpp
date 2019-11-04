@@ -31,6 +31,7 @@ void createLinkMatrix(LinkMatrix *matrix, int *num, int row, int column) {
     }
 }
 
+// bug：行中全为0时出现段错误，不全为0正常
 void displayLinkMatrix(LinkMatrix *matrix, int row) {
     for (int i = 0; i < row; i++) {
         cout << i;
