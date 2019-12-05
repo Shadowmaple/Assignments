@@ -32,6 +32,9 @@ int stack_is_empty(Stack *s) {
 }
 
 int is_palindrome(char *num) {
+    // 单个数字判断
+    if (num[1] == '\0') return 1;
+
     Stack s;
     stack_init(&s, 100);
 
