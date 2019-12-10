@@ -4,7 +4,7 @@
 using namespace std;
 
 # define NUM 5
-# define INF 9999
+# define INF 9999 // 表示无穷大
 
 int dist_min(int a[], int flag[]) {
     int min = INF, k;
