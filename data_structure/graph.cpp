@@ -42,20 +42,13 @@ void dij_search(int matrix[][NUM], int origin) {
         }
     }
 
-    // 输出最短路径
+    // 输出路径
     for (int i = 0; i < NUM; i++) {
-        if (i == origin) continue;
+        if (dist[i] == INF || i == origin) continue;
 
-        if (dist[i] == INF) {
-            cout << "No path!" << endl;
-            continue;
-        }
+        for (int k = i; k != origin; k = path[k])
+            cout << k << "<-";
 
-        int x = i;
-        while (x != origin) {
-            cout << x << "<-";
-            x = path[x];
-        }
         cout << origin << ": " << dist[i] << endl;
     }
 }
