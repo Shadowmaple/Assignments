@@ -58,7 +58,7 @@ void put_result(Stack *s) {
 int main() {
     Stack s;
     stack_init(&s, 8);
-    int i = 0, cout = 0;
+    int i = 0, count = 0;
 
     do {
         while (i < 64 && !stack_is_full(&s, 8)) {
@@ -68,18 +68,18 @@ int main() {
             }
             stack_push(&s, i);
             // i 换到下一行的棋盘
-            i = (s.elem[s.top] / 8 + 1) * 8;
+            i = (i / 8 + 1) * 8;
         }
         if (stack_is_full(&s, 8)) {
             put_result(&s);
-            cout++;
+            count++;
         } else
             i = s.elem[s.top] + 1;
 
         stack_pop(&s);
     } while (!stack_is_empty(&s) || i < 64);
 
-    printf("共%d种解法\n", cout);
+    printf("共%d种解法\n", count);
 
     return 0;
 }
