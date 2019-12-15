@@ -33,6 +33,7 @@ int stackEmpty(Stack *s) {
     return s->top == -1;
 }
 
+// 建树
 TreeNode *createBTree(int i, int n) {
     if (i <= n) {
         TreeNode *p = new TreeNode{i};
@@ -43,6 +44,7 @@ TreeNode *createBTree(int i, int n) {
     return nullptr;
 }
 
+// 先序遍历
 void preOrder(TreeNode *p) {
     Stack s;
     stackInit(&s, NUM);
@@ -73,6 +75,7 @@ void preOrder(TreeNode *p) {
     cout << endl;
 }
 
+// 中序遍历
 void inOrder(TreeNode *p) {
     Stack s;
     stackInit(&s, NUM);
@@ -90,23 +93,26 @@ void inOrder(TreeNode *p) {
     cout << endl;
 }
 
+// 后序遍历
 void afterOrder(TreeNode *p) {
     Stack s;
     stackInit(&s, NUM);
-    TreeNode *flag = NULL;
+    TreeNode *flag = NULL;     // 记录最近访问的节点
+
     while (p || !stackEmpty(&s)) {
         if (p) {
             stackPush(&s, p);
             p = p->left;
         } else {
             p = s.elem[s.top];
+            // 右子树存在且未被访问
             if (p->right && p->right != flag) {
                 p = p->right;
                 continue;
             }
             stackPop(&s);
             cout << p->data << " ";
-            flag = p;
+            flag = p; // 记录最近访问过的节点
             p = nullptr;
         }
     }
