@@ -47,27 +47,78 @@ void preOrder(TreeNode *p) {
     Stack s;
     stackInit(&s, NUM);
 
-    while (p) {
-        while (p) {
-            cout << p->data << " ";
+    // while (p) {
+    //     while (p) {
+    //         cout << p->data << " ";
 
-            if (p->right) stackPush(&s, p->right);
+    //         if (p->right) stackPush(&s, p->right);
+    //         p = p->left;
+    //     }
+    //     if (stackEmpty(&s)) break;
+    //     p = s.elem[s.top];
+    //     stackPop(&s);
+    // }
+
+    while (p || !stackEmpty(&s)) {
+        if (p) {
+            cout << p->data << " ";
+            stackPush(&s, p);
             p = p->left;
+        } else {
+            p = s.elem[s.top];
+            stackPop(&s);
+            p = p->right;
         }
-        if (stackEmpty(&s)) break;
-        p = s.elem[s.top];
-        stackPop(&s);
     }
+    cout << endl;
 }
 
 void inOrder(TreeNode *p) {
+    Stack s;
+    stackInit(&s, NUM);
+    while (p || !stackEmpty(&s)) {
+        if (p) {
+            stackPush(&s, p);
+            p = p->left;
+        } else {
+            p = s.elem[s.top];
+            stackPop(&s);
+            cout << p->data << " ";
+            p = p->right;
+        }
+    }
+    cout << endl;
 }
 
 void afterOrder(TreeNode *p) {
-
+    Stack s;
+    stackInit(&s, NUM);
+    TreeNode *flag = NULL;
+    while (p || !stackEmpty(&s)) {
+        if (p) {
+            stackPush(&s, p);
+            p = p->left;
+        } else {
+            p = s.elem[s.top];
+            if (p->right && p->right != flag) {
+                p = p->right;
+                continue;
+            }
+            stackPop(&s);
+            cout << p->data << " ";
+            flag = p;
+            p = nullptr;
+        }
+    }
+    cout << endl;
 }
 
 int main() {
+    TreeNode *tree = createBTree(1, 8);
+
+    preOrder(tree);
+    inOrder(tree);
+    afterOrder(tree);
 
     return 0;
 }
