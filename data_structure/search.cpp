@@ -18,6 +18,7 @@ void heapBuild(int *num, int size) {
     }
 }
 
+// 向下调整，大根堆
 void heapUpdate(int *num, int size) {
     int index = 0, leftIndex = 1, rightIndex = 2;
     int maxIndex;
@@ -42,13 +43,14 @@ void heapUpdate(int *num, int size) {
     // cout << "--" << size << endl;
 }
 
-
+// 堆排序
 void heapSort(int *num, int size) {
     // 初始建堆
     heapBuild(num, size);
 
     while (size > 1) {
         swap(num[size - 1], num[0]);
+        // 调整至大根堆
         heapUpdate(num, --size);
     }
 }
@@ -83,9 +85,13 @@ int searchNoRecursion(int *num, int key, int size) {
 int main() {
     int num[] = {2, 5, 1, 6, 22, 12, 4, 3};
     heapSort(num, 8);
+
     for (int i = 0; i < 8; i++)
         cout << num[i] << " ";
     cout << endl;
+
+    cout << searchRecursion(num, 22, 0, 7) << endl;
+    cout << searchRecursion(num, 2, 0, 7) << endl;
 
     int a[] = {1,2,3,4,5};
     cout << searchRecursion(a, 4, 0, 4) << endl;
