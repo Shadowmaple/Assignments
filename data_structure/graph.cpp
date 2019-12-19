@@ -1,68 +1,78 @@
-// 求单源最短路径，Dijkstra（迪杰斯特拉）算法
-
 # include <iostream>
 using namespace std;
 
-# define NUM 5
-# define INF 9999 // 表示无穷大
+# define NUM 6
 
-int dist_min(int a[], int flag[]) {
-    int min = INF, k;
-    for (int i = 0; i < NUM; i++) {
-        if (!flag[i] && a[i] < min) {
-            min = a[i];
-            k = i;
-        }
-    }
-    return k;
+typedef struct {
+    int *elem;
+    int top;
+} Stack;
+
+void stackInit(Stack *s, int size) {
+    s->elem = new int(size);
+    s->top = -1;
 }
 
-void dij_search(int matrix[][NUM], int origin) {
-    // 保存当前最短路径长度
-    int dist[NUM] = {0};
-    // 节点是否已求出最短路径
-    int flag[NUM] = {0};
-    // 路径，保存前驱
-    int path[NUM];
-    flag[origin] = 1;
+void stackPush(Stack *s, int e) {
+    s->elem[++s->top] = e;
+}
 
-    for (int i = 0; i < NUM; i++) {
-        dist[i] = matrix[origin][i];
-        path[i] = origin;
-    }
+void stackPop(Stack *s, int *e) {
+    *e = s->elem[s->top--];
+}
 
-    for (int i = 0; i < NUM; i++) {
-        int k = dist_min(dist, flag);
-        flag[k] = 1;
-        for (int j = 0; j < NUM; j++) {
-            if (!flag[j] && matrix[k][j] < INF && dist[k]+matrix[k][j] < dist[j]) {
-                dist[j] = dist[k] + matrix[k][j];
-                path[j] = k;
-            }
+int stackEmpty(Stack *s) {
+    return s->top == -1;
+}
+
+void DFS(int matrix[][NUM], int v) {
+    Stack sk;
+    stackInit(&sk, NUM);
+    stackPush(&sk, v);
+    int visited[NUM] = {0};
+    visited[v] = 1;
+    cout << v + 1 << ' ';
+
+    // sum 为剩余未遍历的节点数
+    int i = 0, sum = NUM - 1;
+    while (sum > 0 || !stackEmpty(&sk)) {
+        // 超出范围，回溯
+        if (i >= NUM) {
+            stackPop(&sk, &v);
+            i = 0;
+            continue;
         }
-    }
-
-    // 输出路径
-    for (int i = 0; i < NUM; i++) {
-        if (dist[i] == INF || i == origin) continue;
-
-        for (int k = i; k != origin; k = path[k])
-            cout << k << "<-";
-
-        cout << origin << ": " << dist[i] << endl;
+        // 已访问的节点，或无边
+        if (visited[i] || !matrix[v][i]) {
+            i++;
+            continue;
+        }
+        // 找到节点
+        cout << i + 1 << ' ';
+        visited[i] = 1;
+        stackPush(&sk, i);
+        sum--;
+        v = i;
+        i = 0;
     }
 }
 
 int main() {
-    int matrix[NUM][NUM] = {
-        0, 10, INF, 30, 100,
-        INF, 0, 50, INF, INF,
-        INF, INF, 0, INF, 10,
-        INF, INF, 20, 0, 60,
-        INF, INF, INF, INF, 0,
+    int matrix[][NUM] = {
+        0,1,1,1,0,0,
+        1,0,0,0,1,0,
+        1,0,0,0,1,0,
+        1,0,0,0,0,1,
+        0,1,1,0,0,0,
+        0,0,0,1,0,0
     };
+    int v;
+    cin >> v;
 
-    dij_search(matrix, 0);
+    // 输入的节点从1开始
+    DFS(matrix, v - 1);
+    cout << endl;
+
 
     return 0;
 }
