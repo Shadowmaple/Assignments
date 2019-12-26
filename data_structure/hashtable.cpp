@@ -3,20 +3,27 @@ using namespace std;
 
 # define HASHSIZE 16
 
-// 哈希函数
-int HO(int key) {
-    return key % 13;
-}
-
 // 解决冲突
 int HI(int i) {
     return (i + 1) % HASHSIZE;
 }
 
+int hashsearch(int *hashtable, int key, int *p, int (*cp)(int)) {
+    int n = key % 13, cout = 0;
+    while (hashtable[n] != 0) {
+        n = cp(n);
+        cout++;
+        // 查找失败
+        if (cout > HASHSIZE) return 0;
+    }
+    // hashtable[n] = key;
+    *p = n;
+    return 1;
+}
+
 void createHashTable(int *hashtable, int *num, int sum) {
-    // hashtable = new int(0);
     for (int i = 0; i < sum; i++) {
-        int n = HO(num[i]);
+        int n = num[i] % 13;
         while (hashtable[n] != 0) {
             n = HI(n);
         }
