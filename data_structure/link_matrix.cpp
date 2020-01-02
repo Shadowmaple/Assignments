@@ -53,11 +53,13 @@ void displayLinkMatrix(LinkMatrix *matrix, int row) {
 }
 
 int main() {
-    int num[25] = {3, 0, 0, 0, 7,
-                    0, 0, -1, 0, 0,
-                    -1, -2, 0, 0, 0,
-                    0, 0, 0, 0, 0,
-                    0, 0, 0, 2, 0};
+    int num[25] = {
+        3, 0, 0, 0, 7,
+        0, 0, -1, 0, 0,
+        -1, -2, 0, 0, 0,
+        0, 0, 0, 0, 0,
+        0, 0, 0, 2, 0
+    };
     LinkMatrix matrix[5] = {NULL};
     createLinkMatrix(matrix, num, 5, 5);
     displayLinkMatrix(matrix, 5);
