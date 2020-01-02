@@ -73,12 +73,12 @@ int main() {
         0,0,0,1,0,0
     };
     int v;
+    cout << "输入起点（从1开始）：";
     cin >> v;
 
     // 输入的节点从1开始
     DFS(matrix, v - 1);
     cout << endl;
-
 
     return 0;
 }
