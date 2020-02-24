@@ -6,13 +6,18 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
-        System.out.println("请输入三个整数a, b和c：");
-        int a = input.nextInt();
-        int b = input.nextInt();
-        int c = input.nextInt();
-        // System.out.printf("%d %d %d\n", a, b, c);
+        System.out.println("请输入三个数a, b和c：");
+        double a = input.nextDouble();
+        double b = input.nextDouble();
+        double c = input.nextDouble();
+        input.close();
 
-        int v = b*b - 4*a*c;
+        if (a == 0) {
+            System.out.println("一元二次方程参数a不能为0");
+            return ;
+        }
+
+        double v = b*b - 4*a*c;
         if (v < 0) {
             System.out.println("无实数解");
             return ;
