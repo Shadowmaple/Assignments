@@ -83,13 +83,10 @@ void runTime(vector<vector<int>> nums, void (*sort)(vector<int>& num)) {
     int size = nums.size();
     clock_t start, end, startPart;
     start = clock();
-    for (int i = 0; i < size; i++) {
-        // startPart = clock();
+
+    for (int i = 0; i < size; i++)
         sort(nums[i]);
-        // double curRunTime = (double)(clock() - startPart) / CLOCKS_PER_SEC;
-        // cout << "Test" << i+1 << " n=" << nums[i].size() << ": " << curRunTime << endl;
-        // cout << "Test" << i+1 << ": " << curRunTime << endl;
-    }
+
     end = clock();
     double runTime = (double)(end - start) / CLOCKS_PER_SEC;
     cout << "Total: " << runTime << endl;
@@ -98,19 +95,19 @@ void runTime(vector<vector<int>> nums, void (*sort)(vector<int>& num)) {
 
 int main() {
     srand(3);
-    vector<int> n = {100, 200, 500, 1000, 2000, 5000, 10000};
+    vector<int> n = {100, 200, 500, 1000, 2000, 5000, 10000, 20000, 30000, 40000, 50000};
 
     // cout << "Bubble Sort" << endl;
-    // runTime(nums, bubbleSort);
-    cout << "Quick Sort" << endl;
-    // runTime(nums, QuickSort);
-    // cout << "Merge Sort" << endl;
+    // cout << "Quick Sort" << endl;
+    cout << "Merge Sort" << endl;
 
     for (int i = 0; i < n.size(); i++) {
         vector<vector<int>> nums;
         sampleData(nums, 1000, n[i]);
         printf("T(%d)：\n", n[i]);
-        runTime(nums, QuickSort);
+        // runTime(nums, QuickSort);
+        // runTime(nums, bubbleSort);
+        runTime(nums, MergeSort);
         cout << "----" << endl;
     }
 
