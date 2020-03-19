@@ -4,6 +4,8 @@
 # include <ctime>
 using namespace std;
 
+bool ending = false;
+
 // 产生随机数
 int proRand(int a, int b) {
     return rand() % (b-a) + a;
@@ -24,9 +26,9 @@ void sampleData(vector<vector<int>>& v, int k, int n) {
 // 冒泡排序
 void bubbleSort(vector<int>& num) {
     int n = num.size();
-    for (int i = 0; i < n-1; i++) {
-        for (int j = i+1; j < n; j++) {
-            if (num[i] > num[j]) swap(num[i], num[j]);
+    for (int i = 0; i < n-2; i++) {
+        for (int j = n-1; j > i; j--) {
+            if (num[j] < num[j-1]) swap(num[j-1], num[j]);
         }
     }
 }
@@ -63,7 +65,6 @@ void mergeSort(vector<int>& num, int left, int right) {
     int result[right-left+1], k = 0;
     while (i <= mid && j <= right) {
         if (num[i] <= num[j])
-            // result.push_back(num[i++]);
             result[k++] = num[i++];
         else
             result[k++] = num[j++];
@@ -79,7 +80,7 @@ void MergeSort(vector<int>& num) {
 }
 
 // 计时
-void runTime(vector<vector<int>> nums, void (*sort)(vector<int>& num)) {
+void runTime(vector<vector<int>>& nums, void (*sort)(vector<int>& num)) {
     int size = nums.size();
     clock_t start, end, startPart;
     start = clock();
@@ -91,6 +92,8 @@ void runTime(vector<vector<int>> nums, void (*sort)(vector<int>& num)) {
     double runTime = (double)(end - start) / CLOCKS_PER_SEC;
     cout << "Total: " << runTime << endl;
     cout << "Average: " << runTime / size << endl;
+
+    if (runTime >= 60) ending = true;
 }
 
 int main() {
@@ -105,10 +108,12 @@ int main() {
         vector<vector<int>> nums;
         sampleData(nums, 1000, n[i]);
         printf("T(%d)：\n", n[i]);
-        // runTime(nums, QuickSort);
         // runTime(nums, bubbleSort);
+        // runTime(nums, QuickSort);
         runTime(nums, MergeSort);
         cout << "----" << endl;
+
+        if (ending) break;
     }
 
     return 0;
