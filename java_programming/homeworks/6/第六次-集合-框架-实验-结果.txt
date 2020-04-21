@@ -1,0 +1,46 @@
+按照程序框架和注释的要求
+把不同的List执行的结果放在该文件中
+把该文件一起打包上传到QQ群
+
+// ArrayList  结果
+Time:17
+Time:12
+Time:21
+Time:2
+Time:0
+Time:1
+Time:24
+Time:14
+Time:25
+Time by Collections:2
+Time by Collections:3
+Time by Collections:2
+
+
+// Vector  结果
+Time:53
+Time:50
+Time:59
+Time:2
+Time:1
+Time:0
+Time:40
+Time:57
+Time:38
+Time by Collections:1
+Time by Collections:1
+Time by Collections:1
+
+// LinkedList  结果
+Time:812
+Time:798
+Time:813
+Time:9
+Time:9
+Time:8
+Time:355
+Time:339
+Time:327
+Time by Collections:1
+Time by Collections:1
+Time by Collections:1
