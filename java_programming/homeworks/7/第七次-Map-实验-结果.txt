@@ -1,0 +1,12 @@
+按照程序框架和注释的要求
+把不同的List执行的结果放在该文件中
+把该文件一起打包上传到QQ群
+
+// 折半查找的结果
+
+Binary Search Time:726
+
+// Map的结果
+
+HashMap Time:254
+Tree Map Time:566
