@@ -1,0 +1,19 @@
+Java IO 体系看起来类很多，感觉很复杂，但其实是 IO 涉及的因素太多了。在设计 IO 相关的类时，编写者也不是从同一个方面考虑的，所以会给人一种很乱的感觉，并且还有设计模式的使用，更加难以使用这些 IO 类，所以特地对 Java 的 IO 做一个总结。
+IO 类设计出来，肯定是为了解决 IO 相关的操作的，想一想哪里会有 IO 操作？网络、磁盘。网络操作相关的类是在 java.net 包下，不在本文的总结范围内。提到磁盘，你可能会想到文件，文件操作在 IO 中是比较典型的操作。在 Java 中引入了 “流” 的概念，它表示任何有能力产生数据源或有能力接收数据源的对象。数据源可以想象成水源，海水、河水、湖水、一杯水等等。数据传输可以想象为水的运输，古代有用桶运水，用竹管运水的，现在有钢管运水，不同的运输方式对应不同的运输特性。
+从数据来源或者说是操作对象角度看，IO 类可以分为：
+1、文件（file）：FileInputStream、FileOutputStream、FileReader、FileWriter
+2、数组（[]）：
+2.1、字节数组（byte[]）：ByteArrayInputStream、ByteArrayOutputStream
+2.2、字符数组（char[]）：CharArrayReader、CharArrayWriter
+3、管道操作：PipedInputStream、PipedOutputStream、PipedReader、PipedWriter
+4、基本数据类型：DataInputStream、DataOutputStream
+5、缓冲操作：BufferedInputStream、BufferedOutputStream、BufferedReader、BufferedWriter
+6、打印：PrintStream、PrintWriter
+7、对象序列化反序列化：ObjectInputStream、ObjectOutputStream
+8、转换：InputStreamReader、OutputStreamWriter
+从数据传输方式或者说是运输方式角度看，可以将 IO 类分为：
+1、字节流
+2、字符流
+字节流是以一个字节单位来运输的，比如一杯一杯的取水。而字符流是以多个字节来运输的，比如一桶一桶的取水，一桶水又可以分为几杯水。
+字节流和字符流的区别：
+字节流读取单个字节，字符流读取单个字符（一个字符根据编码的不同，对应的字节也不同，如 UTF-8 编码是 3 个字节，中文编码是 2 个字节。）字节流用来处理二进制文件（图片、MP3、视频文件），字符流用来处理文本文件（可以看做是特殊的二进制文件，使用了某种编码，人可以阅读）。简而言之，字节是个计算机看的，字符才是给人看的。
