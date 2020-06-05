@@ -95,6 +95,8 @@ void force() {
 
 // // 计时
 void runTime(void (*f)()) {
+    cout << "n = " << n << endl;
+
     clock_t start, end;
     start = clock();
 
@@ -102,11 +104,9 @@ void runTime(void (*f)()) {
 
     end = clock();
     double runTime = (double)(end - start) / CLOCKS_PER_SEC;
-
-    cout << "n = " << n << endl;
-    cout << "Run time: " << runTime << "s" << endl;
-
     if (runTime >= 60) ending = true;
+
+    cout << "Run time: " << runTime << "s" << endl;
 }
 
 // 产生随机数
@@ -123,7 +123,11 @@ void sampleData() {
 }
 
 int main() {
-    int choices[] = {10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60};
+    // 蛮力法测试用例
+    int choices[] = {10, 15, 20, 25, 30, 31, 32, 33, 34, 35, 36};
+    // 回溯法测试用例
+    int choices_1[] = {10, 20, 30, 35, 40, 45, 50, 51, 52, 53, 54};
+    // 动态规划测试用例
     int choices_2[] = {100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000};
 
     srand(3);
@@ -137,6 +141,7 @@ int main() {
 		if (ending) break;
 
 		// n = choices[i];
+        // n = choices_1[i];
         n = choices_2[i];
 		sampleData();
 
