@@ -1,96 +1,96 @@
-// 0/1背包问题实验
+// 最近对问题，设pn=(xn, yn)，平面上有p1,p2,...,pn等n个点构成的集合S，
+// 设计算法找出集合S中距离最近的点对
 
 # include <iostream>
-# include <ctime>
+# include <math.h>
+# include <algorithm>
+# include <vector>
 using namespace std;
 
-int n, C;
-int w[2000], v[2000];
-int max_value;
+# define INF 999999
+
+int n;
 bool ending;
 
-void backTracking_so(int i, int weight, int value, int x[], int cur[]) {
-    if (i == n) {
-        if (max_value < value) {
-            max_value = value;
-            for (int i = 0; i < n; i++) x[i] = cur[i];
+class Point {
+public:
+    int x, y;
+    Point() {};
+    Point(int x, int y) {
+        this->x = x;
+        this->y = y;
+    };
+    double distance(Point p) {
+        return sqrt(pow(x - p.x, 2) + pow(y - p.y, 2));
+    };
+    static bool xcmp(Point a, Point b) {
+        return a.x < b.x;
+    }
+    static bool ycmp(Point a, Point b) {
+        return a.y < b.y;
+    }
+};
+
+Point s[100000];
+
+// 分治法
+double divide(int l, int r) {
+    double d1, d2, d;
+    if (r - l == 1) return s[l].distance(s[r]);
+    else if (r - l == 2) {
+        d1 = s[l].distance(s[l+1]);
+        d2 = s[l].distance(s[r]);
+        d = s[l+1].distance(s[r]);
+        // printf("%f %f %f\n", d1, d2, d);
+        d = d1 < d ? d1 : d;
+        d = d < d2 ? d : d2;
+        return d;
+    }
+
+    int mid = (l + r) / 2;
+    d1 = divide(l, mid);
+    d2 = divide(mid+1, r);
+    d = d1 > d2 ? d2 : d1;
+    // printf("-- %.2f %.2f\n", d1, d2);
+
+    Point p[n];
+    int k = 0;
+    for (int i = mid; i > l && s[mid].x - s[i].x < d; i--)
+        p[k++] = s[i];
+    for (int i = mid+1; i < r && s[i].x - s[mid].x < d; i++)
+        p[k++] = s[i];
+
+    sort(p, p+k, p[0].ycmp);
+    for (int i = 0; i < k-1; i++) {
+        for (int j = i+1; j < k; j++) {
+            if (p[i].y - p[j].y >= d) break;
+            d1 = p[i].distance(p[j]);
+            d = d1 < d ? d1 : d;
         }
-        return ;
     }
-
-    if (C - weight >= w[i]) {
-        cur[i] = 1;
-        backTracking_so(i+1, weight+w[i], value+v[i], x, cur);
-    }
-
-    cur[i] = 0;
-    backTracking_so(i+1, weight, value, x, cur);
+    return d;
 }
 
-// 回溯法
-void backTracking() {
-    max_value = 0;
-    int x[n], cur[n];
-    backTracking_so(0, 0, 0, x, cur);
-
-    // for (int i = 0; i < n; i++)
-    //     cout << x[i] << ' ';
-    // cout << "\nvalue = " << max_value << endl;
-}
-
-// 动态规划
-void dp() {
-    int value[n+1][C+1];
-    for (int i = 0; i <= n; i++) value[i][0] = 0;
-    for (int i = 0; i <= C; i++) value[0][i] = 0;
-
-    for (int i = 1; i <= n; i++) {
-        for (int j = 1; j <= C; j++) {
-            // w[i-1]为第i个物品的质量，v[i-1]亦同
-            if (j < w[i-1]) value[i][j] = value[i-1][j];
-            else value[i][j] = max(value[i-1][j], value[i-1][j - w[i-1]] + v[i-1]);
-        }
-    }
-
-    int x[n] = {0};
-    int j = C;
-    for (int i = n; i > 0; i--) {
-        if (value[i][j] > value[i-1][j]) {
-            x[i-1] = 1;
-            j -= w[i-1];
-        }
-    }
-
-    // for (int i = 0; i < n; i++)
-    //     cout << x[i] << ' ';
-    // cout << "\nvalue = " << value[n][C] << endl;
-}
-
-void force_so(int i, int weight, int value, int x[], int cur[]) {
-    if (i == n) {
-        if (weight <= C && max_value < value){
-            max_value = value;
-            for (int i = 0; i < n; i++) x[i] = cur[i];
-        }
-        return ;
-    }
-
-    cur[i] = 1;
-    force_so(i+1, weight+w[i], value+v[i], x, cur);
-    cur[i] = 0;
-    force_so(i+1, weight, value, x, cur);
+void DivideMethod() {
+    sort(s, s+n, s[0].xcmp);
+    divide(0, n-1);
 }
 
 // 蛮力法
-void force() {
-    max_value = 0;
-    int x[n], cur[n];
-    force_so(0, 0, 0, x, cur);
-
-    // for (int i = 0; i < n; i++)
-    //     cout << x[i] << ' ';
-    // cout << "\nvalue = " << max_value << endl;
-    // cout << "Run time: " << runTime << endl;
+void Force() {
+    double min = INF, d;
+    int tar_1, tar_2;
+    for (int i = 0; i < n-1; i++) {
+        for (int j = i + 1; j < n; j++) {
+            d = s[i].distance(s[j]);
+            if (min > d) {
+                min = d;
+                tar_1 = i;
+                tar_2 = j;
+            }
+        }
+    }
+    // printf("%d %d, distance = %.2f\n", tar_1, tar_2, min);
 }
 
 // // 计时
@@ -115,56 +115,30 @@ int proRand(int a, int b) {
 }
 
 void sampleData() {
-    C = proRand(10, n * 2);
     for (int i = 0; i < n; i++) {
-        w[i] = proRand(1, 20);
-        v[i] = proRand(10, 50);
+        s[i].x = proRand(-100, 100);
+        s[i].y = proRand(-100, 100);
     }
 }
 
 int main() {
-    // 蛮力法测试用例
-    int choices[] = {10, 15, 20, 25, 30, 31, 32, 33, 34, 35, 36};
-    // 回溯法测试用例
-    int choices_1[] = {10, 20, 30, 35, 40, 45, 50, 51, 52, 53, 54};
-    // 动态规划测试用例
-    int choices_2[] = {100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000};
-
-    srand(3);
-
-    puts("\n------ dynamic programming -------\n");
-    // puts("\n------ backtracking -------\n");
-    // puts("\n------ force method -------\n");
-
-    ending = false;
-    for (int i = 0; i < 11; i++) {
-		if (ending) break;
-
-		// n = choices[i];
-        // n = choices_1[i];
-        n = choices_2[i];
-		sampleData();
-
-		runTime(dp);
-		// runTime(backTracking);
-		// runTime(force);
-
-		puts("-------------");
-	}
-
-    // force();
-    // backTracking();
-    // dp();
-
+    n = 5;
+    int choices[] = {100, 200, 500, 1000, 2000, 5000, 10000, 50000};
+    // int x[] = {1, 2, 1, -1, -2};
+    // int y[] = {2, 4, -3, -2, 2};
+    for (int i = 0; i < 8; i++) {
+        // s[i] = Point(x[i], y[i]);
+        n = choices[i];
+        ending = false;
+        sampleData();
+        // runTime(Force);
+        runTime(DivideMethod);
+    }
+    // Force();
+    // sort(s, s+n, s[0].xcmp);
+    // for (int i = 0; i < n; i++)
+    //     cout << s[i].x << " " << s[i].y << endl;
+    // double d = divide(0, n-1);
+    // cout << d << endl;
     return 0;
 }
-
-// n = 5, C = 6
-// w = 3,2,1,4,5
-// v = 25,20,15,40,50
-// 0 0 1 0 1 value = 65
-
-// n = 5, C =10
-// w = 2,2,6,5,4
-// v = 6,3,5,4,6
-// 1,1,0,0,1 value = 15
