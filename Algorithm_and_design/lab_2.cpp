@@ -4,7 +4,6 @@
 # include <iostream>
 # include <math.h>
 # include <algorithm>
-# include <vector>
 using namespace std;
 
 # define INF 999999
@@ -71,6 +70,7 @@ double divide(int l, int r) {
     return d;
 }
 
+// 分治算法
 void DivideMethod() {
     sort(s, s+n, s[0].xcmp);
     divide(0, n-1);
@@ -93,7 +93,7 @@ void Force() {
     // printf("%d %d, distance = %.2f\n", tar_1, tar_2, min);
 }
 
-// // 计时
+// 计时
 void runTime(void (*f)()) {
     cout << "n = " << n << endl;
 
@@ -124,21 +124,12 @@ void sampleData() {
 int main() {
     n = 5;
     int choices[] = {100, 200, 500, 1000, 2000, 5000, 10000, 50000};
-    // int x[] = {1, 2, 1, -1, -2};
-    // int y[] = {2, 4, -3, -2, 2};
     for (int i = 0; i < 8; i++) {
-        // s[i] = Point(x[i], y[i]);
         n = choices[i];
         ending = false;
         sampleData();
         // runTime(Force);
         runTime(DivideMethod);
     }
-    // Force();
-    // sort(s, s+n, s[0].xcmp);
-    // for (int i = 0; i < n; i++)
-    //     cout << s[i].x << " " << s[i].y << endl;
-    // double d = divide(0, n-1);
-    // cout << d << endl;
     return 0;
 }
