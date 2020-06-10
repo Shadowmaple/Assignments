@@ -1,8 +1,3 @@
-CREATE DATABASE `firstdb`;
-
-USE `firstdb`;
-
-
 create user 'mannix'@'host' identified by '123';
 select user,host from mysql.user;
 
