@@ -26,7 +26,7 @@ create table `department` (
 ) comment '系';
 
 create table `association` (
-    `id` int auto_increament,
+    `id` int auto_increment,
     `name` varchar(20),
     `time` datetime comment '成立年份',
     `addr` varchar(20) comment '地点',
