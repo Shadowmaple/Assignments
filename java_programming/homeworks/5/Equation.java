@@ -1,3 +1,5 @@
+// 在第一次作业的基础上添加了异常处理功能，包括自定义异常、异常声明、异常抛出、异常处理等基本功能。
+
 // package cn.edu.ccnu.cs;
 
 import java.util.Scanner;
