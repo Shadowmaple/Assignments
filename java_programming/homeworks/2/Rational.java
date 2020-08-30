@@ -1,3 +1,7 @@
+// 定义一个Rational类（有理数），包含2个私有成员：分子a和分母b
+// 为该类定义四个基本函数：
+// add（加一个有理数），sub（减去一个有理数），mul（乘一个有理数），div（除以一个有理数），show （显示有理数），
+
 public class Rational {
     private int a, b; // 分子a，分母b
 
@@ -78,6 +82,7 @@ public class Rational {
         if (neg) a = -a;
     }
 
+    // 主函数，并计算如下运算结果
     public static void main(String[] args) {
         Rational r1 = new Rational(3, 5);
         Rational r2 = new Rational(4, 7);
