@@ -82,7 +82,7 @@ class QuickSorter implements Sorter {
 class SwtichSorter implements Sorter {
     @Override
     public void sort(List<Student> ss, Comparator c) {
-        for (int i = 0; i <  ss.size()-1; i++) {
+        for (int i = 0; i < ss.size()-1; i++) {
             int k = i;
             for (int j = i+1; j < ss.size(); j++) {
                 if (c.compare(ss.get(k), ss.get(j)) < 0)
