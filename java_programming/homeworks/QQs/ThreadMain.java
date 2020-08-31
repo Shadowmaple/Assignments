@@ -66,5 +66,4 @@ public class ThreadMain {
 		// Print the ending sign
 		System.out.println("Tickets are sold out!");
 	}
-
 }
