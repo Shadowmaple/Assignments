@@ -5,19 +5,19 @@ create table `student` (
     `dept` varchar(10),
     `birth` datetime,
     `age` int
-)
+);
 
 create table `course` (
     `cno` varchar(20) unique,
     `cname` varchar(20) not null,
     `tno` varchar(20)
-)
+);
 
 create table `teacher` (
     `tno` varchar(20),
     `tname` varchar(20),
     `dept` varchar(20) comment '系'
-)
+);
 
 create table `sc` (
     `sno` varchar(20),
@@ -27,7 +27,7 @@ create table `sc` (
 
     foreign key(`sno`) references `student`(`sno`),
     foreign key(`cno`) references `course`(`cno`)
-)
+);
 
 -- query
 
