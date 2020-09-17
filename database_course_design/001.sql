@@ -3,7 +3,7 @@ create table `student` (
     `sname` varchar(20) not null,
     `sex` char(1),
     `dept` varchar(10),
-    `birth` datetime,
+    `birth` date,
     `age` int
 );
 
@@ -34,3 +34,7 @@ create table `sc` (
 select `sname`, `sno`, `dept` from `student`;
 
 select `sname`, `birth` from `student`;
+
+select * from `student` where `sname` like '欧阳%' and length(sname) = 3;
+
+select * from `student` where `sname` like '__晨%';
