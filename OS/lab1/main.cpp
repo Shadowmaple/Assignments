@@ -5,41 +5,45 @@
 # include <unistd.h>
 using namespace std;
 
-class Task {
-private:
-    int id; // 序号
-    int begin; // 开始时间，1011 -> 10:11
-    int duration; // 持续时间
+int curTime;
 
+class Task {
 public:
-    Task(int id, int begin, int duration) {
+    int id; // 序号
+    int inTime; // 进入系统时间，1011 -> 10:11
+    int duration; // 持续时间
+    int beginTime; // 开始运行时间
+
+    Task() {}
+    Task(int id, int inTime, int duration) {
         this->id = id;
-        this->begin = begin;
+        this->inTime = inTime;
         this->duration = duration;
+        this->beginTime = 0;
     }
 
     void Print() {
-        printf("%d %d %d\n", id, begin, duration);
+        printf("%d %d %d %d\n", id, inTime, duration, beginTime);
     }
 
-    // 按持续时间比较，升序
-    static int cmp(Task t1, Task t2) {
-        return t1.duration < t2.duration;
+    // 按进入时间比较，升序
+    static int cmp(Task* t1, Task* t2) {
+        return t1->inTime < t2->inTime;
     }
 
     // 计算响应比
-    // 响应比 = 响应时间 / 要求服务时间 = （等待时间 + 要求服务时间） /  要求服务时间
+    // 响应比 = 响应时间 / 要求服务时间
+    //       = （等待时间 + 要求服务时间） / 要求服务时间
+    //       = 1 + 等待时间 / 要求服务时间
     float CountResponseRate() {
         // 获取当前时间
-        time_t nowTime = time(NULL);
-        struct tm *t = localtime(&nowTime);
-        int now = t->tm_hour * 100 + t->tm_min;
+        // time_t nowTime = time(NULL);
+        // struct tm *t = localtime(&nowTime);
+        // int now = t->tm_hour * 100 + t->tm_min;
 
-        // cout << now << endl;
+        int waitTime = this->inTime - curTime;
 
-        int waitTime = now - this->begin;
-
-        return (waitTime + this->duration) / this->duration;
+        return 1 + waitTime / this->duration;
     }
 
     static int cmpByResponseRate(Task t1, Task t2) {
@@ -49,53 +53,124 @@ public:
     }
 };
 
-vector<Task> v;
+vector<Task*> v;
+
+int computeTime(int time, int duration) {
+    int hour = time / 100;
+    int min = time % 100;
+    int sum = min + duration;
+    min = sum % 60;
+    hour += sum / 60;
+    return hour * 100 + min;
+}
+
 
 // 高响应比优先算法
 void HighResponse() {
-    vector<Task> vp = v;
-    sort(vp.begin(), vp.end(), Task::cmpByResponseRate);
-    for (Task task : vp) {
-        task.Print();
+    int len = v.size();
+
+    // 调度
+    for (int i=0; i < len; i++) {
+        bool hasWait = false; // 是否有当前等待运行调度的任务，即已进入系统
+        int k = i;
+        int x = i; // 标记为在未进入系统的任务中优先调度的
+        for (int j = i+1; j < len; j++) {
+            // 未进入系统的任务
+            if (v[j]->inTime > curTime) {
+                // 已经有等待调度的
+                if (hasWait) continue;
+                if (Task::cmpByResponseRate(*v[j], *v[x])) x = j;
+                continue;
+            }
+            // 已进入系统，等待调度的
+            hasWait = true;
+            if (Task::cmpByResponseRate(*v[j], *v[k])) k = j;
+        }
+        if (!hasWait) {
+            k = x;
+            v[k]->beginTime = v[k]->inTime;
+        } else {
+            v[k]->beginTime = curTime;
+        }
+
+        cout << v[k]->id << " " << v[k]->CountResponseRate() << " " << curTime << endl;
+
+        curTime = computeTime(v[k]->beginTime, v[k]->duration);
+        swap(v[i], v[k]);
     }
 }
 
 // 短作业优先
 void ShortTaskFirst() {
-    vector<Task> vp = v;
-    sort(vp.begin(), vp.end(), Task::cmp);
-    for (Task task : vp) {
-        task.Print();
+    // int curTime = 0;
+    int len = v.size();
+
+    // 调度
+    for (int i=0; i < len; i++) {
+        bool hasWait = false; // 是否有当前等待运行调度的任务，即已进入系统
+        int k = i;
+        int x = i; // 标记为在未进入系统的任务中优先调度的
+        for (int j = i+1; j < len; j++) {
+            // 未进入系统的任务
+            if (v[j]->inTime > curTime) {
+                // 已经有等待调度的
+                if (hasWait) continue;
+                // 最先进入系统的，或同时进入系统但持续时间最短的
+                if (v[x]->inTime > v[j]->inTime ||
+                    v[x]->inTime == v[j]->inTime && v[x]->duration > v[j]->duration)
+                    x = j;
+                continue;
+            }
+            // 已进入系统，等待调度的
+            hasWait = true;
+            if (v[k]->duration > v[j]->duration) {
+                k = j;
+            }
+        }
+        if (!hasWait) {
+            k = x;
+            v[k]->beginTime = v[k]->inTime;
+        } else {
+            v[k]->beginTime = curTime;
+        }
+
+        curTime = computeTime(v[k]->beginTime, v[k]->duration);
+        swap(v[i], v[k]);
     }
 }
 
+// 先进先出
 void FIFO() {
-    for (Task task : v) {
-        task.Print();
+    sort(v.begin(), v.end(), Task::cmp);
+    for (Task* task : v) {
+        task->beginTime = curTime;
+        curTime = computeTime(task->beginTime, task->duration);
     }
 }
 
 int main() {
-    // getTime();
-
+    curTime = INT32_MAX;
     int n;
+    cout << "输入作业数：";
     cin >> n;
-    int id, begin, duration;
+    int id, inTime, duration;
     for (int i = 0; i < n; i++) {
-        cin >> id >> begin >> duration;
-        v.push_back(Task(id, begin, duration));
+        cin >> id >> inTime >> duration;
+        Task* task = new Task(id, inTime, duration);
+        v.push_back(task);
+
+        // 取最早的作业的时间为当前时间
+        curTime = curTime > inTime ? inTime : curTime;
     }
-
-    cout << "作业调度，输出：" << endl;
-
-    // while(1) {
-    //     cout << v[0].CountResponseRate() << endl;
-    //     sleep(1);
-    // }
 
     // FIFO();
     // ShortTaskFirst();
     HighResponse();
+
+    cout << "作业调度顺序，输出：" << endl;
+    for (Task* task : v) {
+        task->Print();
+    }
 
     return 0;
 }
