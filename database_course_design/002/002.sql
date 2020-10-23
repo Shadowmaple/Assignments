@@ -1,4 +1,4 @@
-create database `library` in not exists;
+create database `library` if not exists;
 
 use `library`;
 
