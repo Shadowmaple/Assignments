@@ -69,7 +69,7 @@ void HighResponse() {
     int len = v.size();
 
     // 调度
-    for (int i=0; i < len; i++) {
+    for (int i = 0; i < len; i++) {
         int k = i;
         for (int j = i+1; j < len; j++) {
             if (Task::cmpByResponseRate(*v[j], *v[k])) k = j;
@@ -146,8 +146,8 @@ int main() {
     }
 
     // FIFO();
-    ShortTaskFirst();
-    // HighResponse();
+    // ShortTaskFirst();
+    HighResponse();
 
     cout << "作业调度顺序，输出：" << endl;
     for (Task* task : v) {
@@ -166,3 +166,5 @@ int main() {
 6 900 10
 7 920 5
 */
+
+// 1256743
