@@ -44,8 +44,8 @@ public:
     //       = （等待时间 + 要求服务时间） / 要求服务时间
     //       = 1 + 等待时间 / 要求服务时间
     float CountResponseRate() {
-        int waitTime = convertTimeToMin(curTime) - convertTimeToMin(this->inTime);
-        return 1 + waitTime / this->duration;
+        float waitTime = convertTimeToMin(curTime) - convertTimeToMin(this->inTime);
+        return 1 + waitTime / float(this->duration);
     }
 
     // 按进入时间比较，升序
@@ -166,5 +166,3 @@ int main() {
 6 900 10
 7 920 5
 */
-
-// 1256743
