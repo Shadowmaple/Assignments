@@ -2,18 +2,20 @@
 # include <vector>
 # include <map>
 # include <stack>
+# include <queue>
+# include <set>
 # include <string>
 # include <sstream>
 using namespace std;
 
-# define INF 99999 // 不可达
-# define NODE_NUM 0
+# define INF -1 // 不可达
 
 string s;
 int nodeNum;
 
 struct Node {
     string name;
+    int id;
 };
 
 struct Edge {
@@ -22,6 +24,7 @@ struct Edge {
     char symbol;
 };
 
+// 数字转字符串
 string itoStr(int num) {
     stringstream ss;
     ss << num;
@@ -119,25 +122,219 @@ public:
         cout << "NFA 的结束状态：" << this->end->name << endl;
         cout << "NFA 的边数：" << this->edges.size() << endl;
         for (int i = 0; i < edges.size(); i++) {
-            auto edage = edges[i];
+            auto edge = edges[i];
             cout << "第" << i << "条边" << ' '
-                << "起始状态：" << edage.start->name << ' '
-                << "结束状态：" << edage.end->name << ' '
-                << "转换符：" << edage.symbol << endl;
-            // printf("第%d条边 起始状态:%s 结束状态:%s 转换符:%c\n", i, edage.start->name.c_str, edage.end->name, edage.symbol);
+                << "起始状态：" << edge.start->name << ' '
+                << "结束状态：" << edge.end->name << ' '
+                << "转换符：" << edge.symbol << endl;
+            // printf("第%d条边 起始状态:%s 结束状态:%s 转换符:%c\n", i, edge.start->name.c_str, edge.end->name, edge.symbol);
         }
         cout << "END" << endl;
     }
 };
 
+class DFA {
+public:
+    vector<Node*> start;
+    vector<Node*> end;
+    vector<vector<int>> table;
+    set<char> symbols;
+    // vector<Node*> states;
+
+    DFA() {}
+
+    void Display() {
+        cout << "DFA 的开始状态：";
+        for (auto node : start) {
+            cout << node->id << " ";
+        }
+        cout << endl << "DFA 的结束状态：";
+        for (auto node : end) {
+            cout << node->id << " ";
+        }
+        // 打印x轴顶部栏（字符集）
+        cout << endl << "  ";
+        for (auto symbol : symbols) {
+            cout << symbol << " ";
+        }
+        cout << endl;
+
+        // 结果
+        for (int i = 0; i < table.size(); i++) {
+            cout << i << " ";
+            for (int j = 0; j < table[i].size(); j++) {
+                cout << table[i][j] << " ";
+            }
+            cout << endl;
+        }
+        cout << "END" << endl;
+    }
+
+    // 化简，最小化
+    void Simplify() {}
+};
+
+// 是否是有效字符（字母、数字）
 bool isLetter(char c) {
     return c <= 'Z' && c >= 'A' || c <= 'z' && c >= 'a' || c >= '0' && c <= '9';
 }
 
-void convertToDFA() {}
+
+struct StateMap {
+    vector<Node*> oldNodes;
+    Node* newNode;
+};
+
+// 根据 NFA 状态集查找对应产生的 DFA 新状态
+Node* GetNewStateByOldNodes(vector<StateMap*>& stateMapList, vector<Node*>& curNodes) {
+    int len = curNodes.size();
+    for (auto mp : stateMapList) {
+        if (mp->oldNodes.size() != len) continue;
+
+        bool flag = true;
+        for (auto signedNode : mp->oldNodes) {
+            bool find = false;
+            for (auto n : curNodes) {
+                if (signedNode->name == n->name) {
+                    find = true;
+                    break;
+                }
+            }
+            if (!find) {
+                flag = false;
+                break;
+            }
+        }
+        if (flag) return mp->newNode;
+    }
+    return nullptr;
+}
+
+/*
+// 当前新状态（DFA的旧状态集）是否被标记
+bool hasExisted(vector<vector<Node*>>& signedNodesList, vector<Node*>& curNodes) {
+    int len = curNodes.size();
+    for (auto signedNodes : signedNodesList) {
+        if (signedNodes.size() != len) continue;
+        bool flag = true;
+        for (auto signedNode : signedNodes) {
+            bool find = false;
+            for (auto n : curNodes) {
+                if (signedNode->name == n->name) {
+                    find = true;
+                    break;
+                }
+            }
+            if (!find) {
+                flag = false;
+                break;
+            }
+        }
+        if (flag) return true;
+    }
+    return false;
+}
+*/
+
+// 获取可达点
+vector<Node*> getReachableNodes(const NFA* entry, const Node* node, char symbol) {
+    vector<Node*> v;
+    for (auto edge : entry->edges) {
+        if (edge.start->name == node->name && edge.symbol == symbol) {
+            v.push_back(edge.end);
+        }
+    }
+    return v;
+}
+
+// 是否包含开始状态/结束状态，0 否，1 开始状态，2 结束状态，3 既是开始状态又是结束状态
+int IsSpecialNode(Node* startNode, Node* endNode, vector<Node*>& curNodes) {
+    int isStart = 0, isEnd = 0;
+    for (auto node : curNodes) {
+        if (node->name == startNode->name) {
+            isStart = 1;
+        } else if (node->name == endNode->name) {
+            isEnd = 2;
+        }
+    }
+    return isStart + isEnd;
+}
+
+// 转为 DFA
+void convertToDFA(const NFA* entry) {
+    // 获取字符集
+    set<char> symbols;
+    for (auto e : entry->edges) {
+        symbols.insert(e.symbol);
+    }
+
+    DFA* dfa = new DFA();
+    // 存储 DFA 状态图的二维表，y 为状态，x 为转换字符
+    vector<vector<int>> x;
+    // DFA的新产生的状态集
+    vector<Node*> states;
+
+    // 未标记的状态集队列
+    queue<StateMap*> q;
+    StateMap* mp = new StateMap{vector<Node*>{entry->start}, new Node{itoStr(nodeNum), nodeNum++}};
+    q.push(mp);
+
+    // 保存状态映射集合，用于根据NFA状态集获取产生的DFA新状态
+    vector<StateMap*> stateMapList{mp};
+    // vector<vector<Node*>> signedNodes{vector<Node*>{entry->start}};
+
+    while (!q.empty()) {
+        auto stateMp = q.front();
+        q.pop();
+
+        // 该状态是否是开始状态或结束状态（包含NFA的开始和结束状态）
+        switch (IsSpecialNode(entry->start, entry->end, stateMp->oldNodes)) {
+            case 1: dfa->start.push_back(stateMp->newNode); break;
+            case 2: dfa->end.push_back(stateMp->newNode); break;
+            case 3:
+                dfa->start.push_back(stateMp->newNode);
+                dfa->end.push_back(stateMp->newNode);
+        }
+
+        vector<int> v;
+        // 遍历字符集
+        for (auto symbol : symbols) {
+            vector<Node*> allReachableNodes;
+            // 遍历状态集
+            for (auto node : stateMp->oldNodes) {
+                auto reachableNodes = getReachableNodes(entry, node, symbol);
+                if (reachableNodes.empty()) continue;
+                allReachableNodes.insert(allReachableNodes.end(), reachableNodes.begin(), reachableNodes.end());
+            }
+            if (allReachableNodes.empty()) {
+                v.push_back(INF);
+                continue;
+            }
+            Node* curState = GetNewStateByOldNodes(stateMapList, allReachableNodes);
+            // 若未查找到，即该状态未被标记，则加入队列
+            if (curState == nullptr) {
+                // 新的状态节点
+			    curState = new Node{itoStr(nodeNum), nodeNum++};
+                states.push_back(curState);
+
+				StateMap* newStateMp = new StateMap{allReachableNodes, curState};
+				q.push(newStateMp);
+				// signedNodes.push_back(allReachableNodes);
+                stateMapList.push_back(newStateMp);
+            }
+
+			// 加入新的状态映射
+			v.push_back(curState->id);
+        }
+        x.push_back(v);
+    }
+    dfa->table = x;
+    dfa->symbols = symbols;
+    dfa->Display();
+}
 
 // 转为 NFA
-void convertToNFA() {
+NFA* convertToNFA() {
     stack<NFA*> sk;
     for (char c : s) {
         switch (c) {
@@ -171,6 +368,7 @@ void convertToNFA() {
     }
     NFA* entry = sk.top();
     entry->Display();
+    return entry;
 }
 
 // 转后缀表达式/逆波兰式
@@ -231,22 +429,30 @@ void connectorCompletion() {
 }
 
 // 检验是否合法
+// TO DO
 bool check() {
     return true;
 }
 
 int main() {
     cin >> s;
-    check();
+    if (!check()) {
+        cout << "正规式输入错误！" << endl;
+        return 0;
+    }
 
     connectorCompletion();
     cout << s << endl;
     convertToPostfixExpression();
     cout << s << endl;
 
-    convertToNFA();
+    NFA* entry = convertToNFA();
+
+    nodeNum = 0;
+    convertToDFA(entry);
 
     return 0;
 }
 
 // 1(0|1)*10
+// (01|1)*1
