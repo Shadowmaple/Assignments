@@ -133,13 +133,15 @@ public:
     }
 };
 
+
+// TO DO: 字符集改成 map<int, char>
 class DFA {
 public:
-    vector<Node*> start;
-    vector<Node*> end;
-    vector<vector<int>> table;
-    set<char> symbols;
-    // vector<Node*> states;
+    vector<Node*> start;       // 开始状态
+    vector<Node*> end;         // 终结状态
+    vector<vector<int>> table; // 状态二维表
+    set<char> symbols;         // 字符集
+    vector<Node*> states;      // 状态集合
 
     DFA() {}
 
@@ -171,14 +173,109 @@ public:
     }
 
     // 化简，最小化
-    void Simplify() {}
+    void Simplify() {
+        vector<vector<Node*>> v;
+
+        // 分为终态集合和非终态集合
+        vector<Node*> terminalStates, noTerminalStates;
+        for (auto node : states) {
+            bool isEnd = false;
+            for (auto endNode : end) {
+                if (node->id == endNode->id) {
+                    isEnd = true;
+                    break;
+                }
+            }
+            if (isEnd) terminalStates.push_back(node);
+            else noTerminalStates.push_back(node);
+        }
+        v.push_back(noTerminalStates);
+        v.push_back(terminalStates);
+
+        // 若非终态集合能被划分，则划分集合
+        // 若终态集合能被划分，则划分集合
+        SplitStates(v, 0);
+
+        if (v.size() == 2) return ;
+
+        // 构造最小化 DFA
+        vector<vector<int>> newTable;
+        for (auto ss : v) {
+            vector<int> ax;
+            for (int i = 0; i < symbols.size(); i++) {
+                ax.push_back(table[ss[0]->id][i]);
+            }
+            newTable.push_back(ax);
+        }
+        this->table = newTable;
+    }
+
+private:
+    void SplitStates(vector<vector<Node*>>& v, int splitIndex) {
+        if (splitIndex >= v.size()) return ;
+        if (v[splitIndex].size() <= 1) {
+            SplitStates(v, splitIndex + 1);
+            return ;
+        }
+
+        // 已分隔的状态映射，作用：哪个节点属于哪个集合
+        map<int, int> mp;
+        for (int i = 0; i < v.size(); i++) {
+            for (auto node : v[i]) {
+                if (node->id != INF) mp[node->id] = i;
+            }
+        }
+        mp[INF] = v.size();
+
+        bool hasSplited = false;
+        // 对每个状态求其对应输入字符下转换得到的状态
+        vector<vector<Node*>> vx;
+        int splitCount = 0; // 分割集合数
+        // 遍历每个输入字符
+        for (int i = 0; i < symbols.size(); i++) {
+            int exists[v.size()+1];
+            for (int j = 0; j <= v.size(); j++)  exists[j] = 0;
+
+            // 若该状态集合是某个状态集合的子集，则无需分隔，否则需要分隔
+            for (auto node : v[splitIndex]) {
+                int value = table[node->id][i];
+                int idx = exists[mp[value]];
+                // 空集也要分隔
+                if (!idx) {
+                    vx.push_back(vector<Node*>{node});
+                    exists[mp[value]] = ++splitCount;
+                } else {
+                    vx[idx-1].push_back(node);
+                }
+            }
+            // 都转换到同一个集合，无需分隔
+            if (splitCount == 1) continue;
+            // 分割
+            // 移除原有集合，如{A,B,C}
+            auto it = v.begin();
+            for (int j = 0; it != v.end(); it++, j++) {
+                if (j == splitIndex) {
+                    v.erase(it);
+                    break;
+                }
+            }
+            // 添加新的分隔后的集合，如{A,B},{C}
+            // 在中间插入
+            v.insert(it, vx.begin(), vx.end());
+            hasSplited = true;
+            break;
+        }
+
+        // 分隔
+        if (hasSplited) SplitStates(v, splitIndex);
+        else SplitStates(v, splitIndex + 1);
+    }
 };
 
 // 是否是有效字符（字母、数字）
 bool isLetter(char c) {
     return c <= 'Z' && c >= 'A' || c <= 'z' && c >= 'a' || c >= '0' && c <= '9';
 }
-
 
 struct StateMap {
     vector<Node*> oldNodes;
@@ -272,7 +369,7 @@ void convertToDFA(const NFA* entry) {
     // 存储 DFA 状态图的二维表，y 为状态，x 为转换字符
     vector<vector<int>> x;
     // DFA的新产生的状态集
-    vector<Node*> states;
+    vector<Node*> states{entry->start};
 
     // 未标记的状态集队列
     queue<StateMap*> q;
@@ -330,6 +427,10 @@ void convertToDFA(const NFA* entry) {
     }
     dfa->table = x;
     dfa->symbols = symbols;
+    dfa->states = states;
+    dfa->Display();
+
+    dfa->Simplify();
     dfa->Display();
 }
 
@@ -456,3 +557,4 @@ int main() {
 
 // 1(0|1)*10
 // (01|1)*1
+// b*ab(b|ab)*
