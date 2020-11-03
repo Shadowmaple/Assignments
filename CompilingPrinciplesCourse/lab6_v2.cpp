@@ -15,7 +15,6 @@ int nodeNum;
 
 struct Node {
     string name;
-    int id;
 };
 
 struct Edge {
@@ -24,11 +23,32 @@ struct Edge {
     char symbol;
 };
 
+struct DNode {
+    string name;
+    int kind; // 类型，0 普通，1 开始状态，2 结束状态，3 既是开始状态又是结束状态
+    map<char, DNode*> targets; // 输入字符后的转换状态
+    // TO DO: set<Node*>
+    set<Node*> elements;	// 新状态对应的原始状态集合
+
+    DNode(string name) {
+        this->name = name;
+        kind = 0;
+    }
+};
+
 // 数字转字符串
 string itoStr(int num) {
     stringstream ss;
     ss << num;
     string s;
+    ss >> s;
+    return s;
+}
+
+// 生成状态标识
+string GenerateName() {
+    stringstream ss;
+    ss << char(nodeNum++ + 'A');
     ss >> s;
     return s;
 }
@@ -131,41 +151,41 @@ public:
         }
         cout << "END" << endl;
     }
+
+    // 获取某状态在输入字符下的所有可达点
+    void GetReachableNodes(set<Node*>& reachableNodes, const Node* node, char symbol) {
+        for (auto edge : this->edges) {
+            if (edge.start->name == node->name && edge.symbol == symbol) {
+                reachableNodes.insert(edge.end);
+            }
+        }
+    }
 };
 
 class DFA {
 public:
-    vector<Node*> start;       // 开始状态
-    vector<Node*> end;         // 终结状态
-    vector<vector<Node*>> table; // 状态二维表
-    set<char> symbols;         // 字符集
-    vector<Node*> states;      // 状态集合
-
-    DFA() {}
+    vector<DNode*> start;  // 开始状态
+    vector<DNode*> end;    // 终结状态
+    vector<DNode*> states; // 状态集合
+    set<char> symbols;     // 字符集
 
     void Display() {
         cout << "DFA 的开始状态：";
         for (auto node : start) {
-            cout << node->id << " ";
+            cout << node->name << " ";
         }
         cout << endl << "DFA 的结束状态：";
         for (auto node : end) {
-            cout << node->id << " ";
-        }
-        // 打印x轴顶部栏（字符集）
-        cout << endl << "  ";
-        for (auto symbol : symbols) {
-            cout << symbol << " ";
+            cout << node->name << " ";
         }
         cout << endl;
 
         // 结果
-        puts("--------");
-        for (int i = 0; i < table.size(); i++) {
-            cout << i << " ";
-            for (auto node : table[i]) {
-                if (node == nullptr) cout << "-" << " ";
-                else cout << node->id << " ";
+        for (auto state : states) {
+            cout << "状态" << state->name << "：";
+            for (auto target : state->targets) {
+                if (target.second == nullptr) continue;
+                cout << "输入" << target.first << " -> " << target.second->name << " ";
             }
             cout << endl;
         }
@@ -174,20 +194,13 @@ public:
 
     // 化简，最小化
     void Simplify() {
-        vector<vector<Node*>> v;
+        vector<vector<DNode*>> v;
 
         // 分为终态集合和非终态集合
-        vector<Node*> terminalStates, noTerminalStates;
-        for (auto node : states) {
-            bool isEnd = false;
-            for (auto endNode : end) {
-                if (node->id == endNode->id) {
-                    isEnd = true;
-                    break;
-                }
-            }
-            if (isEnd) terminalStates.push_back(node);
-            else noTerminalStates.push_back(node);
+        vector<DNode*> terminalStates, noTerminalStates;
+        for (auto state : states) {
+            if (state->kind > 1) terminalStates.push_back(state);
+            else noTerminalStates.push_back(state);
         }
         v.push_back(noTerminalStates);
         v.push_back(terminalStates);
@@ -198,64 +211,60 @@ public:
 
         if (v.size() == 2) return ;
 
-        /* --- 构造最小化 DFA，合并状态 --- */
+        // --- 构造最小化 DFA，合并状态 ---
 
         // 映射，原先的状态属于新的某个状态，
-        // 如，{2,3} -> 2
+        // 如，{2,3} -> 5
         // map<Node*, Node*> mp;
-        map<int, Node*> idMap;
-        vector<Node*> newStates;
+        map<string, DNode*> idMap;
+        vector<DNode*> newStates;
         for (int i = 0; i < v.size(); i++) {
-            Node* newState = new Node{itoStr(i), i};
+            DNode* newState = new DNode(GenerateName());
             newStates.push_back(newState);
-            for (auto node : v[i]) {
+            for (DNode* node : v[i]) {
                 // mp[node] = newState;
-                idMap[node->id] = newState;
+                idMap[node->name] = newState;
+                // 开始和终结状态
+                // if (node->kind == 1) newState->kind = 1;
+                // else if (node->kind == 2) newState->kind = 2;
+                newState->kind |= node->kind;
             }
         }
 
-        // TO DO: vector<map<char, Node*>>
-        vector<vector<Node*>> newTable;
-        // v: {{0},{1,3},{2}}
-        // ss: {1,3}...
-        for (auto ss : v) {
-            // 同一集合中状态转换都一样，所以只取第一个，如{1,3}取1
-            Node* originNode = ss[0];
-            vector<Node*> ax;
-            for (int i = 0; i < symbols.size(); i++) {
-                // 获取原先转换得到的状态
-                Node* originTargetNode = table[originNode->id][i];
-                if (originTargetNode == nullptr) {
-                    ax.push_back(nullptr);
-                } else {
-                    // 获取新的转换状态，要取消合并后的状态，转到新的状态节点
-                    Node* newTargetNode = idMap[originTargetNode->id];
-                    ax.push_back(newTargetNode);
+        // 遍历原状态
+        for (DNode* originNode : states) {
+            // 该状态最小化后对应的新状态
+            DNode* newState = idMap[originNode->name];
+            // 遍历原状态对应字符的转换
+            for (auto target : originNode->targets) {
+                auto symbol = target.first;
+                auto targetNode = target.second;
+
+                if (targetNode == nullptr) newState->targets[symbol] = nullptr;
+                else {
+                    // 原目标状态经最小化后的新的状态
+                    auto newTargetNode = idMap[targetNode->name];
+                    newState->targets[symbol] = newTargetNode;
                 }
-                // if (table[originNode->id][i])
-                //     cout << table[originNode->id][i]->id << " ";
-                // else cout << "-" << " ";
             }
-            newTable.push_back(ax);
-            // cout << endl;
         }
-        this->table = newTable;
         this->states = newStates;
 
         // 修正开始状态和终结状态
-        vector<Node*> startStates, endStates;
+        vector<DNode*> startStates, endStates;
         for (auto n : this->start) {
-            startStates.push_back(idMap[n->id]);
+            startStates.push_back(idMap[n->name]);
         }
         for (auto n : this->end) {
-            endStates.push_back(idMap[n->id]);
+            endStates.push_back(idMap[n->name]);
         }
         this->start = startStates;
         this->end = endStates;
     }
 
 private:
-    void SplitStates(vector<vector<Node*>>& v, int splitIndex) {
+    // 分割状态集合，对下标为 splitIndex 集合进行分隔
+    void SplitStates(vector<vector<DNode*>>& v, int splitIndex) {
         if (splitIndex >= v.size()) return ;
         if (v[splitIndex].size() <= 1) {
             SplitStates(v, splitIndex + 1);
@@ -263,37 +272,39 @@ private:
         }
 
         // 已分隔的状态映射，作用：哪个节点属于哪个集合
-        map<int, int> mp;
+        map<string, int> mp;
         for (int i = 0; i < v.size(); i++) {
             for (auto node : v[i]) {
-                if (node->id != INF) mp[node->id] = i;
+                mp[node->name] = i;
             }
         }
 
         bool hasSplited = false;
         // 对每个状态求其对应输入字符下转换得到的状态
-        vector<vector<Node*>> vx;
+        vector<vector<DNode*>> vx;
         // 遍历每个输入字符
-        for (int i = 0; i < symbols.size(); i++) {
+        for (char symbol : this->symbols) {
             int splitCount = 0; // 分割集合数
             // exists[v.size()] 用于存储 INF
             int exists[v.size()+1];
             for (int j = 0; j <= v.size(); j++)  exists[j] = 0;
 
+            // 对该下标的状态集合进行划分，如 {A,B,C}
             // 若该状态集合是某个状态集合的子集，则无需分隔，否则需要分隔
-            for (auto node : v[splitIndex]) {
-                Node* toNode = table[node->id][i];
+            for (DNode* node : v[splitIndex]) {
+                // 获取输入字符后转换得到的状态
+                DNode* targetNode = node->targets[symbol];
                 // 空集也要分隔
-                int vectorId = toNode != nullptr ? mp[toNode->id] : v.size();
-
+                int vectorId = targetNode != nullptr ? mp[targetNode->name] : v.size();
+                // 将该状态放入分组
                 if (!exists[vectorId]) {
-                    vx.push_back(vector<Node*>{node});
+                    vx.push_back(vector<DNode*>{node});
                     exists[vectorId] = ++splitCount;
                 } else {
                     vx[exists[vectorId]-1].push_back(node);
                 }
             }
-            // 都转换到同一个集合，无需分隔
+            // 只有一个分组，即该集合内各个状态都转换到同一个集合，无需分割
             if (splitCount == 1) {
                 vx.clear();
                 continue;
@@ -307,8 +318,8 @@ private:
                     break;
                 }
             }
-            // 添加新的分隔后的集合，如{A,B},{C}
-            // 在中间插入
+            // 添加新的分割后的集合，如{A,B},{C}
+            // 在原删除处插入
             v.insert(it, vx.begin(), vx.end());
             hasSplited = true;
             break;
@@ -325,22 +336,17 @@ bool IsLetter(char c) {
     return c <= 'Z' && c >= 'A' || c <= 'z' && c >= 'a' || c >= '0' && c <= '9';
 }
 
-struct StateMap {
-    vector<Node*> oldNodes;
-    Node* newNode;
-};
-
 // 根据 NFA 状态集查找对应产生的 DFA 新状态
-Node* GetNewStateByOldNodes(vector<StateMap*>& stateMapList, vector<Node*>& curNodes) {
+DNode* GetNewStateByOldNodes(vector<DNode*>& states, set<Node*>& curNodes) {
     int len = curNodes.size();
-    for (auto mp : stateMapList) {
-        if (mp->oldNodes.size() != len) continue;
+    for (auto newState : states) {
+        if (newState->elements.size() != len) continue;
 
         bool flag = true;
-        for (auto signedNode : mp->oldNodes) {
+        for (auto signedState : newState->elements) {
             bool find = false;
             for (auto n : curNodes) {
-                if (signedNode->name == n->name) {
+                if (signedState->name == n->name) {
                     find = true;
                     break;
                 }
@@ -350,50 +356,13 @@ Node* GetNewStateByOldNodes(vector<StateMap*>& stateMapList, vector<Node*>& curN
                 break;
             }
         }
-        if (flag) return mp->newNode;
+        if (flag) return newState;
     }
     return nullptr;
 }
 
-/*
-// 当前新状态（DFA的旧状态集）是否被标记
-bool hasExisted(vector<vector<Node*>>& signedNodesList, vector<Node*>& curNodes) {
-    int len = curNodes.size();
-    for (auto signedNodes : signedNodesList) {
-        if (signedNodes.size() != len) continue;
-        bool flag = true;
-        for (auto signedNode : signedNodes) {
-            bool find = false;
-            for (auto n : curNodes) {
-                if (signedNode->name == n->name) {
-                    find = true;
-                    break;
-                }
-            }
-            if (!find) {
-                flag = false;
-                break;
-            }
-        }
-        if (flag) return true;
-    }
-    return false;
-}
-*/
-
-// 获取可达点
-vector<Node*> GetReachableNodesA(const NFA* entry, const Node* node, char symbol) {
-    vector<Node*> v;
-    for (auto edge : entry->edges) {
-        if (edge.start->name == node->name && edge.symbol == symbol) {
-            v.push_back(edge.end);
-        }
-    }
-    return v;
-}
-
-// 是否包含开始状态/结束状态，0 否，1 开始状态，2 结束状态，3 既是开始状态又是结束状态
-int IsSpecialNode(Node* startNode, Node* endNode, vector<Node*>& curNodes) {
+// 状态集中是否包含原开始状态/结束状态，0 否，1 开始状态，2 结束状态，3 既是开始状态又是结束状态
+int IsSpecialNode(Node* startNode, Node* endNode, set<Node*>& curNodes) {
     int isStart = 0, isEnd = 0;
     for (auto node : curNodes) {
         if (node->name == startNode->name) {
@@ -406,7 +375,7 @@ int IsSpecialNode(Node* startNode, Node* endNode, vector<Node*>& curNodes) {
 }
 
 // 转为 DFA
-void ConvertToDFA(const NFA* entry) {
+void ConvertToDFA(NFA* entry) {
     // 获取字符集
     set<char> symbols;
     for (auto e : entry->edges) {
@@ -414,70 +383,67 @@ void ConvertToDFA(const NFA* entry) {
     }
 
     DFA* dfa = new DFA();
-    // 存储 DFA 状态图的二维表，y 为状态，x 为转换字符
-    vector<vector<Node*>> x;
     // DFA的新产生的状态集
-    vector<Node*> states{entry->start};
+    vector<DNode*> states;
+    DNode* curState = new DNode(GenerateName());
+    curState->elements = set<Node*>{entry->start};
+    states.push_back(curState);
 
-    // 未标记的状态集队列
-    queue<StateMap*> q;
-    StateMap* mp = new StateMap{vector<Node*>{entry->start}, new Node{itoStr(nodeNum), nodeNum++}};
-    q.push(mp);
-
-    // 保存状态映射集合，用于根据NFA状态集获取产生的DFA新状态
-    vector<StateMap*> stateMapList{mp};
-    // vector<vector<Node*>> signedNodes{vector<Node*>{entry->start}};
+    // 状态集队列
+    queue<DNode*> q;
+    q.push(curState);
 
     while (!q.empty()) {
-        auto stateMp = q.front();
+        curState = q.front();
         q.pop();
 
         // 该状态是否是开始状态或结束状态（包含NFA的开始和结束状态）
-        switch (IsSpecialNode(entry->start, entry->end, stateMp->oldNodes)) {
-            case 1: dfa->start.push_back(stateMp->newNode); break;
-            case 2: dfa->end.push_back(stateMp->newNode); break;
+        int kind = IsSpecialNode(entry->start, entry->end, curState->elements);
+        curState->kind = kind;
+        switch (kind) {
+            case 1: dfa->start.push_back(curState); break;
+            case 2: dfa->end.push_back(curState); break;
             case 3:
-                dfa->start.push_back(stateMp->newNode);
-                dfa->end.push_back(stateMp->newNode);
+                dfa->start.push_back(curState);
+                dfa->end.push_back(curState);
         }
 
-        vector<Node*> v;
         // 遍历字符集
         for (auto symbol : symbols) {
-            vector<Node*> allReachableNodes;
+            // 获取该输入字符下所有可达的状态
+            set<Node*> reachableNodes;
             // 遍历状态集
-            for (auto node : stateMp->oldNodes) {
-                auto reachableNodes = GetReachableNodesA(entry, node, symbol);
-                if (reachableNodes.empty()) continue;
-                allReachableNodes.insert(allReachableNodes.end(), reachableNodes.begin(), reachableNodes.end());
+            for (auto node : curState->elements) {
+                // 获取可达状态
+                entry->GetReachableNodes(reachableNodes, node, symbol);
             }
-            if (allReachableNodes.empty()) {
-                v.push_back(nullptr);
+            // 若为空集
+            if (reachableNodes.empty()) {
+                curState->targets[symbol] = nullptr;
                 continue;
             }
-            Node* curState = GetNewStateByOldNodes(stateMapList, allReachableNodes);
-            // 若未查找到，即该状态未被标记，则加入队列
-            if (curState == nullptr) {
-                // 新的状态节点
-			    curState = new Node{itoStr(nodeNum), nodeNum++};
-                states.push_back(curState);
 
-				StateMap* newStateMp = new StateMap{allReachableNodes, curState};
-				q.push(newStateMp);
-				// signedNodes.push_back(allReachableNodes);
-                stateMapList.push_back(newStateMp);
+            // 查找该可达的状态集对应的被标记的新状态
+            DNode* targetState = GetNewStateByOldNodes(states, reachableNodes);
+            // 若未查找到，即该状态未被标记，则加入队列
+            if (targetState == nullptr) {
+                // 新的状态节点
+			    targetState = new DNode(GenerateName());
+                targetState->elements = reachableNodes;
+                states.push_back(targetState);
+
+				q.push(targetState);
             }
 
-			// 加入新的状态映射
-			v.push_back(curState);
+            // 加入新的状态映射
+            curState->targets[symbol] = targetState;
         }
-        x.push_back(v);
     }
-    dfa->table = x;
-    dfa->symbols = symbols;
     dfa->states = states;
+    dfa->symbols = symbols;
     dfa->Display();
 
+    cout << "---------------- DFA 最小化 ----------------" << endl;
     dfa->Simplify();
     dfa->Display();
 }
@@ -579,13 +545,13 @@ void ConnectorCompletion() {
 
 // 检验是否合法
 // TO DO
-bool Check() {
+bool CheckValid() {
     return true;
 }
 
 int main() {
     cin >> s;
-    if (!Check()) {
+    if (!CheckValid()) {
         cout << "正规式输入错误！" << endl;
         return 0;
     }
@@ -595,9 +561,11 @@ int main() {
     ConvertToPostfixExpression();
     cout << s << endl;
 
+    cout << "------------------- NFA -------------------" << endl;
     NFA* entry = ConvertToNFA();
 
     nodeNum = 0;
+    cout << "------------------- DFA -------------------" << endl;
     ConvertToDFA(entry);
 
     return 0;
