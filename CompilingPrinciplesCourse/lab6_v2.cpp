@@ -546,6 +546,10 @@ void ConnectorCompletion() {
 // 检验是否合法
 // TO DO
 bool CheckValid() {
+    stack<char> sk;
+    for (char c : s) {
+
+    }
     return true;
 }
 
