@@ -543,32 +543,22 @@ void ConnectorCompletion() {
     s = r;
 }
 
-// 检验是否合法
-// TO DO
-bool CheckValid() {
-    stack<char> sk;
-    for (char c : s) {
-
-    }
-    return true;
-}
-
 int main() {
     cin >> s;
-    if (!CheckValid()) {
-        cout << "正规式输入错误！" << endl;
-        return 0;
-    }
 
+    // 连接词补全
     ConnectorCompletion();
     cout << s << endl;
+    // 转换为后缀表达式（逆波兰式）
     ConvertToPostfixExpression();
     cout << s << endl;
 
+    // 转换为 NFA
     cout << "------------------- NFA -------------------" << endl;
     NFA* entry = ConvertToNFA();
 
     nodeNum = 0;
+    // 转换为 DFA
     cout << "------------------- DFA -------------------" << endl;
     ConvertToDFA(entry);
 

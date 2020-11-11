@@ -579,13 +579,17 @@ void ConnectorCompletion() {
 
 // 检验是否合法
 // TO DO
-bool Check() {
+bool CheckValid() {
+    stack<char> sk;
+    for (char c : s) {
+
+    }
     return true;
 }
 
 int main() {
     cin >> s;
-    if (!Check()) {
+    if (!CheckValid()) {
         cout << "正规式输入错误！" << endl;
         return 0;
     }
