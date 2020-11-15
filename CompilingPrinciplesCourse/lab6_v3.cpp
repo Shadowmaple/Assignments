@@ -199,8 +199,8 @@ public:
 
 class DFA {
 public:
-    vector<DNode*> start;  // 开始状态
-    vector<DNode*> end;    // 终结状态
+    set<DNode*> start;  // 开始状态
+    set<DNode*> end;    // 终结状态
     vector<DNode*> states; // 状态集合
     set<char> symbols;     // 字符集
 
@@ -286,12 +286,12 @@ public:
         this->states = newStates;
 
         // 修正开始状态和终结状态
-        vector<DNode*> startStates, endStates;
+        set<DNode*> startStates, endStates;
         for (auto n : this->start) {
-            startStates.push_back(idMap[n->name]);
+            startStates.insert(idMap[n->name]);
         }
         for (auto n : this->end) {
-            endStates.push_back(idMap[n->name]);
+            endStates.insert(idMap[n->name]);
         }
         this->start = startStates;
         this->end = endStates;
@@ -443,11 +443,11 @@ void ConvertToDFA(NFA* entry) {
         int kind = IsSpecialNode(entry->start, entry->end, curState->elements);
         curState->kind = kind;
         switch (kind) {
-            case 1: dfa->start.push_back(curState); break;
-            case 2: dfa->end.push_back(curState); break;
+            case 1: dfa->start.insert(curState); break;
+            case 2: dfa->end.insert(curState); break;
             case 3:
-                dfa->start.push_back(curState);
-                dfa->end.push_back(curState);
+                dfa->start.insert(curState);
+                dfa->end.insert(curState);
         }
 
         // 遍历字符集
