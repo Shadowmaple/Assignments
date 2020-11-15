@@ -14,6 +14,8 @@ public:
     int waitTime;
     int runTime;
 
+    Process() {}
+
     Process(int id, int needTime, int priority) {
         this->id = id;
         this->state = 1;
@@ -26,16 +28,39 @@ public:
     void Show() {
         cout << id << " " << waitTime << endl;
     }
-
-    // 计算等待时间
-    int computeWaitTime() {}
 };
 
 float totalWaitTime;
-// int curTime;
 vector<Process*> v;
 
-// 优先数调度算法
+struct Cmp {
+    bool operator () (Process* a, Process* b) {
+        return a->priority > b->priority;
+    }
+};
+
+// 优先数调度算法，非抢占式
+void PriorityScheduling() {
+    priority_queue<Process*, vector<Process*>, Cmp> q;
+    // priority_queue<Process*> q;
+    for (auto p : v) q.push(p);
+    v.clear();
+
+    float curTime = 0;
+    while (!q.empty()) {
+        auto process = q.top();
+        q.pop();
+        cout << process->id << " ";
+        process->waitTime = curTime;
+        curTime += process->needTime;
+        v.push_back(process);
+    }
+    cout << endl;
+
+    for (auto p : v) {
+        totalWaitTime += p->waitTime;
+    }
+}
 
 // 时间片轮转算法
 void RoundRobin() {
@@ -50,20 +75,21 @@ void RoundRobin() {
         auto process = q.front();
         q.pop();
         cout << process->id << " ";
-        // process->waitTime += totalWaitTime - process->runTime;
-        process->waitTime += curTime;
+        process->waitTime = curTime - process->runTime;
 
+        // 运行需要时间 <= 时间片轮转时间，即本次就结束
         if (process->needTime <= robinTime) {
             curTime += process->needTime;
             process->runTime += process->needTime;
             process->needTime = 0;
             v.push_back(process);
-            continue;
+        } else {
+            // 还需要下次接着运行
+            curTime += robinTime;
+            process->needTime -= robinTime;
+            process->runTime += robinTime;
+            q.push(process);
         }
-        curTime += robinTime;
-        process->needTime -= robinTime;
-        process->runTime += robinTime;
-        q.push(process);
     }
     cout << endl;
 
@@ -84,6 +110,7 @@ void Display() {
     for (auto p : v) {
         p->Show();
     }
+    cout << totalWaitTime << endl;
     cout << totalWaitTime / v.size() << endl;
 }
 
@@ -97,9 +124,6 @@ int main() {
         cin >> id  >> needTime >> priority;
         Process* process = new Process(id, needTime, priority);
         v.push_back(process);
-
-        // 取最早的作业的时间为当前时间
-        // curTime = curTime > inTime ? inTime : curTime;
     }
 
     totalWaitTime = 0;
@@ -107,7 +131,8 @@ int main() {
     cout << "------ 调度结果 -------" << endl;
 
     // FIFO();
-    RoundRobin();
+    // RoundRobin();
+    PriorityScheduling();
 
     Display();
 
