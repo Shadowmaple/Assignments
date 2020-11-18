@@ -588,14 +588,15 @@ void ConnectorCompletion() {
 }
 
 int main() {
+    cout << "输入正规式：";
     cin >> s;
 
     // 连接词补全
     ConnectorCompletion();
-    cout << s << endl;
+    cout << "连接词补全：" << s << endl;
     // 转换为后缀表达式（逆波兰式）
     ConvertToPostfixExpression();
-    cout << s << endl;
+    cout << "逆波兰式：" << s << endl;
 
     // 转换为 NFA
     cout << "------------------- NFA -------------------" << endl;
