@@ -15,7 +15,6 @@ public:
     int runTime;
 
     Process() {}
-
     Process(int id, int needTime, int priority) {
         this->id = id;
         this->state = 1;
