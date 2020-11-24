@@ -9,7 +9,6 @@ using namespace std;
 class Process {
 public:
     int id;
-    int state; // 进程状态 (1 就绪 2 等待 3 运行）
     int inTime; // 进入系统时间，1011 -> 10:11
     int needTime; // 需要运行时间
     int priority; // 优先级，0最高
@@ -19,7 +18,6 @@ public:
     Process() {}
     Process(int id, int inTime, int needTime, int priority) {
         this->id = id;
-        this->state = 1;
         this->inTime = inTime;
         this->needTime = needTime;
         this->priority = priority;
@@ -172,7 +170,6 @@ void Display() {
 }
 
 int main() {
-    // curTime = INT32_MAX;
     int n;
     cout << "输入作业数：";
     cin >> n;
