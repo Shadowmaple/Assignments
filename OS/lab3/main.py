@@ -1,5 +1,7 @@
 """ 分区式存储管理算法实现 """
 
+import copy
+
 
 # 分区
 class Block:
@@ -14,7 +16,7 @@ class Block:
         print("addr={}, size={}".format(self.addr, self.size))
 
     def show(self):
-        print("开始 {} 大小 {}".format(self.addr, self.size))
+        print("开始地址 = {}，size = {}".format(self.addr, self.size))
 
     # 分配
     def allocate(self, size: int):
@@ -22,91 +24,74 @@ class Block:
         self.size -= size
 
 
-# 首次适应算法
+def allocate(area, requests, sort_key=None, sort_reverse=False):
+    """ 分配 """
+
+    for request in requests:
+        area.sort(key=sort_key, reverse=sort_reverse)
+        flag = False
+
+        # 查找可分配的分区
+        for block in area:
+            if block.size < request:
+                continue
+            # 分配
+            area.remove(block)
+            if block.size > request:
+                block.allocate(request)
+                area.append(block)
+            flag = True
+            break
+
+        if flag:
+            print("分配 {} 成功".format(request))
+        else:
+            print("分配 {} 失败".format(request))
+
+
 def first_match(area, requests):
-    for request in requests:
-        area.sort(key=lambda x: x.addr)
-        # print([x.addr for x in area])
-        flag = False
-        for block in area:
-            if block.size < request:
-                continue
+    """ 首次适应算法 """
 
-            # 分配
-            area.remove(block)
-            if block.size > request:
-                block.allocate(request)
-                area.append(block)
+    print("\n********** 首次适应算法 ********** ")
+    area = copy.deepcopy(area)
 
-            flag = True
-            break
+    # 分配
+    # 关键字为地址升序序列
+    allocate(area, requests, lambda x: x.addr)
 
-        if flag:
-            print("分配 {} 成功".format(request))
-        else:
-            print("分配 {} 失败".format(request))
-
-    print("剩余空间：")
-    for block in area:
-        block.show()
+    display_free_space(area)
 
 
-# 最佳适应算法
 def best_match(area, requests):
-    for request in requests:
-        # 按分区大小升序排列
-        area.sort(key=lambda x: x.size)
-        flag = False
-        for block in area:
-            if block.size < request:
-                continue
+    """ 最佳适应算法 """
 
-            # 分配
-            area.remove(block)
-            if block.size > request:
-                block.allocate(request)
-                area.append(block)
+    print("\n********** 最佳适应算法 ********** ")
+    area = copy.deepcopy(area)
 
-            flag = True
-            break
+    # 分配
+    # 关键字按页面大小升序排列
+    allocate(area, requests, lambda x: x.size)
 
-        if flag:
-            print("分配 {} 成功".format(request))
-        else:
-            print("分配 {} 失败".format(request))
-
-    print("剩余空间：")
-    area.sort(key=lambda x: x.addr)
-    for block in area:
-        block.show()
+    display_free_space(area)
 
 
-# 最坏适应算法
 def worst_match(area, requests):
-    for request in requests:
-        # 按分区大小降序排列
-        area.sort(key=lambda x: x.size, reverse=True)
-        flag = False
-        for block in area:
-            if block.size < request:
-                continue
+    """ 最坏适应算法 """
 
-            # 分配
-            area.remove(block)
-            if block.size > request:
-                block.allocate(request)
-                area.append(block)
+    print("\n********** 最坏适应算法 ********** ")
+    area = copy.deepcopy(area)
 
-            flag = True
-            break
+    # 分配
+    # 关键字按页面大小降序排列
+    allocate(area, requests, lambda x: x.size, True)
 
-        if flag:
-            print("分配 {} 成功".format(request))
-        else:
-            print("分配 {} 失败".format(request))
+    display_free_space(area)
 
-    print("剩余空间：")
+
+def display_free_space(area: list):
+    """ 显示剩余空间 """
     area.sort(key=lambda x: x.addr)
+    print("剩余空间：")
     for block in area:
         block.show()
 
@@ -125,19 +110,20 @@ if __name__ == "__main__":
         size = int(input())
         requests.append(size)
 
-    # first_match(blocks, requests)
-    # best_match(blocks, requests)
+    first_match(blocks, requests)
+    best_match(blocks, requests)
     worst_match(blocks, requests)
 
 
 """
+测试用例：
 3
 0 300
 350 200
-700 112
+700 162
 4
-150
 200
+150
 90
 80
 """
