@@ -1,2 +1,14 @@
-# Assignments
-Assignments in my university.
+# Assignments in CCNU
+
+华中师范大学计算机课程作业
+
++ C 语言程序设计
++ C++ 面向对象程序设计
++ 数据结构
++ 数据库原理
++ 数据库课程设计
++ ACM 程序设计
++ Java 面向对象程序设计
++ 算法与数据结构
++ 操作系统
++ 编译原理
