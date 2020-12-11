@@ -285,17 +285,6 @@ class Oper_First:
 
         print('-'*56)
 
-
-    def judge_grammar(self):
-        # 得到FIRSTVT集合
-        firstvt = self.get_firstvt()
-        # 得到LASTVT集合
-        lastvt = self.get_lastvt()
-        # 得到算符优先关系表
-        table, state, is_flag = self.get_priority_table(firstvt, lastvt)
-
-        return is_flag, firstvt, lastvt, table, state
-
     def run(self):
         """ 运行 """
 
@@ -306,40 +295,41 @@ class Oper_First:
 
         # 得到FIRSTVT集合
         firstvt = self.get_firstvt()
-        print("该文法的FIRSTVT:")
+        print("FIRSTVT 集合:")
         for key, value in firstvt.items():
             print("FIRSTVT(%s) = {%s}" % (key, str(value)[1:-1]))
         print('-'*50, end="\n\n")
 
         # 得到LASTVT集合
         lastvt = self.get_lastvt()
-        print("该文法的LASTVT集合:")
+        print("LASTVT 集合:")
         for key, value in lastvt.items():
             print("LASTVT(%s) = {%s}" % (key, str(value)[1:-1]))
         print('-'*50, end="\n\n")
 
         # 得到算符优先关系表
-        table, state, is_flag = self.get_priority_table(firstvt, lastvt)
-        if not is_flag:
+        table, states, valid = self.get_priority_table(firstvt, lastvt)
+        if not valid:
             print("该文法不属于算符优先文法")
             return
 
-        print("%27s" % ("算符优先关系表"))
-        print('-'*50)
-        for i in state:
-            print("%8s" % i, end="")
+        # 打印算符优先关系表
+        print("%27s" % ("算符优先关系表") + '\n' + '-'*50)
+        print("|" + " "*6, end="")
+        for i in states:
+            print("{:^7}".format(i), end="")
         print()
         for i in range(len(table)):
-            print("%s" % state[i], end="")
-            print("%7s" % table[i][0], end="")
-            for x in table[i][1:]:
-                print("%8s" % x, end="")
+            print("|{:^6}|".format(states[i]), end="")
+            # print("%7s" % table[i][0], end="")
+            for x in table[i]:
+                print("{:^6}|".format(x), end="")
             print("")
         print('-'*50 , end="\n\n")
+
         # 对输入串进行算符分析
         print("对输入串 %s 进行归约：" % (self.input_str) + '\n' + '-'*56)
-        self.analysis_operator(table, state)
-        # print(steps)
+        self.analysis_operator(table, states)
 
 
 if __name__ == '__main__':
