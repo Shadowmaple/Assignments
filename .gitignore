@@ -4,3 +4,7 @@
 *.class
 *.rar
 *.zip
+.idea
+*.iml
+*.log
+*.xlsx
