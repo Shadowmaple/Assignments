@@ -9,10 +9,10 @@ import (
 
 type FileState struct {
 	Name      string
-	ChangeNum int   // 修改次数
-	AddNum    int64 // 添加行数
-	DeleteNum int64 // 删除行数
-	Class     int   // 是否是bug修复文件
+	ChangeNum int    // 修改次数
+	AddNum    int64  // 添加行数
+	DeleteNum int64  // 删除行数
+	Class     string // 是否是bug修复文件
 }
 
 var (
@@ -47,12 +47,16 @@ func main() {
 	fileList := GetProFiles()
 	for _, item := range fileList {
 		fileStateMap[item] = &FileState{
-			Name: item,
+			Name:  item,
+			Class: "not bug-prone",
 		}
 	}
 
 	// 解析日志文件块
 	ParseLoggers(loggers)
+
+	// bug 标记
+	SetBugProne()
 
 	// 导出至 xlsx
 	ExportCsv()

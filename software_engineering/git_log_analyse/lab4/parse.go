@@ -15,28 +15,28 @@ var (
 
 func ParseLoggers(loggers [][]string) {
 	// 获取xml中的commit
-	commitMp := getBugCommit()
+	// commitMp := getBugCommit()
 
 	// 解析commit log
 	for _, block := range loggers {
 		// 当前commit是否是bug修复的commit，即这一系列文件的提交是否是因为bug修复的
-		commit := getLoggerCommit(block[0])
-		isBugCommit := 0
-		if len(commit) == 0 {
-			continue
-		}
-		if _, ok := commitMp[commit]; ok {
-			isBugCommit = 1
-		}
+		// commit := getLoggerCommit(block[0])
+		// isBugCommit := 0
+		// if len(commit) == 0 {
+		// 	continue
+		// }
+		// if _, ok := commitMp[commit]; ok {
+		// 	isBugCommit = 1
+		// }
 		// 解析文件名、增删行数
 		for _, s := range block {
-			parseLogFile(s, isBugCommit)
+			parseLogFile(s)
 		}
 	}
 }
 
 // 正则解析git log文件字符串
-func parseLogFile(line string, isBugCommit int) {
+func parseLogFile(line string) {
 	matches := rgx.FindStringSubmatch(line)
 	if len(matches) < 4 {
 		return
@@ -61,9 +61,11 @@ func parseLogFile(line string, isBugCommit int) {
 	state.ChangeNum++
 	state.AddNum += addNum
 	state.DeleteNum += deleteNum
-	if isBugCommit == 1 {
-		state.Class = 1
-	}
+	// if isBugCommit == 1 {
+	// 	state.Class = "bug-prone"
+	// } else {
+	// 	state.Class = "not bug-prone"
+	// }
 }
 
 // 解析 jira 日志文件

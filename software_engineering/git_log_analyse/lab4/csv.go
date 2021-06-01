@@ -26,7 +26,7 @@ func ExportCsv() {
 			strconv.Itoa(value.ChangeNum),
 			strconv.Itoa(int(value.AddNum)),
 			strconv.Itoa(int(value.DeleteNum)),
-			strconv.Itoa(value.Class),
+			value.Class,
 		})
 	}
 
